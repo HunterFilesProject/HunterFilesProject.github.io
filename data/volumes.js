@@ -10,10 +10,8 @@
 
 import { VOL_01 } from "../content/volumes/volume-01.js";
 import { VOL_02 } from "../content/volumes/volume-02.js";
-import { VOL_03 } from "../content/volumes/volume-03.js";
 
 export const VOLUMES = [
   VOL_01,
   VOL_02,
-  VOL_03,
 ];

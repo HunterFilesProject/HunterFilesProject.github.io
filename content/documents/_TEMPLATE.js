@@ -1,12 +1,22 @@
 /*
   DOCUMENT ENTRY GUIDE
   ====================
-  Copy this file, rename it to the next DOC-### id, and fill in the
+  Copy this file, rename it to the next unused id, and fill in the
   fields below. See CONTENT_GUIDE.md for the full walkthrough.
 
   id
-    Unique ID, formatted "DOC-XXX". Never reuse an id, even for a
-    document that gets deleted later.
+    Unique ID, formatted "HF<volume number>#<4-digit number>", e.g.
+    "HF1#0001" for volume 1, "HF2#0001" for volume 2. Never reuse an
+    id, even for a document that gets deleted later, and never reuse
+    a number just because an earlier one is missing/skipped.
+
+    Filename note: because this site loads content as native ES
+    modules, a literal "#" in a *filename* would break the import
+    (the browser reads everything after "#" as a URL fragment, not
+    part of the path). So the id value itself keeps the real "#"
+    (e.g. id: "HF1#0001"), but the filename and the exported constant
+    swap it for a dash/underscore instead: content/documents/HF1-0001.js
+    exporting `HF1_0001`. Match that pattern for any new document.
 
   volume
     The id of the volume this document belongs to, e.g. "VOL-01".
@@ -65,7 +75,7 @@
 
   relatedDocuments
     Optional. An array of other document ids this one relates to,
-    e.g. ["DOC-005", "DOC-006"]. These become clickable links
+    e.g. ["HF1#0005", "HF1#0006"]. These become clickable links
     automatically. If you reference a document id that doesn't exist,
     the site will skip it and print a warning in the browser console
     (during development) rather than showing a broken link.
@@ -76,7 +86,7 @@
 */
 
 export const DOC_TEMPLATE = {
-  id: "DOC-XXX",
+  id: "HF1#XXXX",
   volume: "VOL-01",
   sortOrder: null,
   title: "",
