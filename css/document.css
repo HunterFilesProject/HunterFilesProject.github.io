@@ -1,0 +1,125 @@
+/*
+  document.css
+  ------------
+  Styling for individual record pages: document.html, person.html,
+  and the detail portions of volume.html. Section dividers use
+  hairline rules rather than boxed cards, echoing the archive's own
+  paper-record layout.
+*/
+
+.doc-header { margin-bottom: var(--space-5); }
+.doc-header h1 { margin-bottom: var(--space-2); }
+
+.doc-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-1);
+}
+
+.section-block { margin: var(--space-6) 0; }
+.section-block h2 {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-3);
+}
+
+.context-body :is(h1,h2,h3) { font-size: var(--text-md); margin-top: var(--space-5); }
+.context-body p { max-width: 68ch; }
+.context-body blockquote {
+  margin: var(--space-4) 0;
+  padding: var(--space-1) var(--space-4);
+  border-left: 3px solid var(--color-border-strong);
+  color: var(--color-ink-muted);
+  font-style: italic;
+}
+.context-body ul { max-width: 68ch; }
+
+.related-grid {
+  display: grid;
+  gap: var(--space-2);
+}
+.related-card {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+.related-card:hover { border-color: var(--color-border-strong); text-decoration: none; }
+.related-card .related-title { color: var(--color-ink); font-weight: 600; }
+.related-card .related-meta { font-size: var(--text-xs); color: var(--color-ink-muted); }
+
+.doc-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+.doc-pager a {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+}
+.doc-pager a:hover { border-color: var(--color-border-strong); text-decoration: none; }
+.doc-pager .pager-label { display: block; font-size: var(--text-xs); color: var(--color-ink-muted); margin-bottom: 0.2em; }
+.doc-pager .pager-next { text-align: right; }
+.doc-pager .pager-spacer { flex: 1; }
+
+.people-index {
+  display: grid;
+  gap: var(--space-2);
+}
+.person-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+.person-row:hover { border-color: var(--color-border-strong); text-decoration: none; }
+.person-row .person-count { font-size: var(--text-xs); color: var(--color-ink-muted); }
+
+.person-volume-group { margin-bottom: var(--space-5); }
+.person-volume-group h3 { font-size: var(--text-sm); color: var(--color-ink-muted); font-family: var(--font-sans); }
+
+.person-doc-list { list-style: none; margin: 0; padding: 0; }
+.person-doc-list li { padding: 0.3em 0; }
+
+.volume-description {
+  color: var(--color-ink-muted);
+  max-width: 60ch;
+  margin-bottom: var(--space-6);
+}
+
+.volume-doc-table {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+.volume-doc-table li a {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+.volume-doc-table li a:hover { border-color: var(--color-border-strong); text-decoration: none; }
+.volume-doc-table .vdt-title { font-family: var(--font-serif); }
+.volume-doc-table .vdt-meta { font-size: var(--text-xs); color: var(--color-ink-muted); white-space: nowrap; }

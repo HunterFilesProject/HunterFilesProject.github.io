@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("archive:theme");
+      if (t) document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  })();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Document Archive</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/navigation.css">
+<link rel="stylesheet" href="css/search.css">
+<link rel="stylesheet" href="css/document.css">
+</head>
+<body data-page="about">
+<div class="drawer-backdrop" id="drawer-backdrop"></div>
+<header class="site-header" id="site-header"></header>
+<div class="shell">
+  <aside class="sidebar" id="sidebar" aria-label="Volumes and navigation"></aside>
+  <div class="main-column">
+    <!--
+      This page is a rare exception: its text is short, changes
+      infrequently, and isn't part of the searchable document
+      collection, so it's fine to edit the paragraph below directly
+      rather than routing it through content/. Everything else in
+      the archive should still go through content/ as described in
+      CONTENT_GUIDE.md.
+    -->
+    <main id="app-content">
+      <h1>About this archive</h1>
+      <p>This archive is a searchable collection of historical and documentary
+        records, organized into volumes. Each document page includes its
+        available context, referenced people, keywords, and links to related
+        documents.</p>
+      <p>Use the search bar to find documents by title, person, date,
+        location, or keyword, or browse by volume using the sidebar.</p>
+    </main>
+    <footer class="site-footer">Document Archive — a static, searchable record collection.</footer>
+  </div>
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

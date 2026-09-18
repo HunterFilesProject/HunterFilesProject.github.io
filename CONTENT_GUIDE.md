@@ -1,0 +1,236 @@
+# Content Guide
+
+This guide is for adding and editing documents, people, and volumes in
+the archive. **You do not need to know HTML, CSS, or JavaScript
+programming to use it** — you're only ever editing plain data.
+
+If you've never edited a file like this before, the short version is:
+every document is a file that looks like a form with blanks filled in
+(`title: "..."`, `date: "..."`, and so on). You fill in the blanks,
+save the file, and the website builds the page for you automatically.
+
+---
+
+## Before you start: the one rule that matters most
+
+**Never edit anything in the `css/`, `js/` folders, or the `.html`
+files.** Everything you need to do lives in `content/` (and one small
+step in `data/`). If a task seems to require editing those other
+folders, stop — something's off, and it's worth asking the developer
+rather than guessing.
+
+---
+
+## Adding a new document
+
+1. Go to `content/documents/`.
+2. Copy `_TEMPLATE.js` and rename the copy to the next unused ID, e.g.
+   `DOC-011.js`. (Check `data/documents.js` to see the highest ID
+   currently in use.)
+3. Open your new file and fill in the fields. Here's what each one
+   means (this same guide is also written as comments at the top of
+   `_TEMPLATE.js`, so it's always close at hand):
+
+   | Field | Required? | What it is |
+   |---|---|---|
+   | `id` | Yes | Must match the filename, e.g. `"DOC-011"`. Never reuse an id, even for a deleted document. |
+   | `volume` | Yes | Which volume this belongs to, e.g. `"VOL-01"`. This is the only place you set a document's volume — you don't need to edit anything in `content/volumes/`. |
+   | `sortOrder` | No | A number controlling order within the volume. Leave it out if you don't need a specific order. |
+   | `title` | Yes | The document's title. |
+   | `date` | No | Machine-readable: `"1954-06-14"`, `"1954-06"`, or just `"1954"`. |
+   | `dateDisplay` | No | Only needed if the date is unusual, e.g. `"Early summer, 1954"`. Otherwise leave blank — a readable version is generated from `date` automatically. |
+   | `roughTime` | No | e.g. `"Morning"`, `"Evening"`. |
+   | `location` | No | e.g. `"Florida"`. |
+   | `people` | No | A list of person **IDs** (not names!) — see "Referencing people" below. |
+   | `keywords` | No | A list of search terms, e.g. `["Florida", "property"]`. |
+   | `summary` | Recommended | One or two sentences, shown in lists and search results. |
+   | `context` | Recommended | The full write-up — see "Writing the context field" below. |
+   | `relatedDocuments` | No | A list of other document **IDs** — see "Referencing other documents" below. |
+   | `sourceUrl` | No | A link to an original scanned file/image, if one exists online. Leave the whole line out if there isn't one. |
+
+4. Save the file.
+5. Open `data/documents.js`. Add one import line and one line in the
+   list, following the existing pattern:
+
+   ```javascript
+   import { DOC_011 } from "../content/documents/DOC-011.js";
+   // ...
+   export const DOCUMENTS = [
+     DOC_001,
+     // ...
+     DOC_010,
+     DOC_011,
+   ];
+   ```
+
+   This step is intentionally manual (rather than automatic) so it's
+   always clear, just by reading this one file, exactly which
+   documents are live on the site.
+
+6. Commit and push to GitHub. The site updates automatically — see
+   the main `README.md` for details.
+
+New documents are usually added at the *end* of the list in
+`data/documents.js` — the home page's "Recently added" section shows
+whatever is listed last.
+
+---
+
+## Editing an existing document
+
+Open its file in `content/documents/`, change whichever fields need
+updating, and save. You don't need to touch `data/documents.js` at all
+for an edit — that file only changes when you add or remove a
+document entirely.
+
+---
+
+## Adding a new person
+
+Open `content/people.js`. Add a new line:
+
+```javascript
+{ id: "P-006", name: "Someone's Name" },
+```
+
+Use the next unused `P-###` id. Then reference that id (not the name)
+in any document's `people` field.
+
+**Before adding a new person, check whether they already exist** —
+scan the list in `content/people.js` for a name close to the one
+you're about to add. This avoids the exact problem person IDs are
+meant to solve: the same person accidentally being entered under two
+different spellings ("Jane Doe #3" and "Jane Doe#3") and treated as
+two different people on the site. The site's built-in validation (see
+"Troubleshooting" below) will also flag likely duplicates for you.
+
+---
+
+## Adding a new volume
+
+1. Go to `content/volumes/`, copy an existing file (e.g.
+   `volume-03.js`), and rename it, e.g. `volume-04.js`.
+2. Edit its `id`, `number`, `title`, and `description`.
+3. Open `data/volumes.js` and add one import line and one array entry,
+   the same way you did for a document.
+
+You do **not** list a volume's documents anywhere in the volume file
+itself — a document joins a volume by setting its own `volume: "VOL-04"`
+field. The volume's page and document count are generated automatically.
+
+---
+
+## Referencing people
+
+Always use the person's **ID**, never their name, in a document's
+`people` field:
+
+```javascript
+people: ["P-002", "P-001"],
+```
+
+The website looks up the name from `content/people.js` and displays
+it — and links to that person's page — automatically.
+
+## Referencing other documents
+
+Same idea, using document IDs in `relatedDocuments`:
+
+```javascript
+relatedDocuments: ["DOC-005", "DOC-006"],
+```
+
+If you reference a document ID that doesn't exist (a typo, or a
+document that hasn't been added yet), the site won't show a broken
+link — it just quietly skips that reference and prints a note in the
+browser's developer console, which the site's built-in checker also
+surfaces (see "Troubleshooting").
+
+---
+
+## Writing the `context` field
+
+Plain text works as-is. **Blank lines become paragraph breaks** —
+you don't need to write any HTML:
+
+```javascript
+context: `
+This is the first paragraph.
+
+This is the second paragraph.
+`,
+```
+
+A small set of extra formatting is also understood:
+
+```text
+# A heading
+
+**bold text**
+
+- a bullet point
+- another bullet point
+
+> a quoted or reconstructed note
+```
+
+That's the complete list — headings (`#`), bold (`**text**`), bullet
+lists (`-`), and blockquotes (`>`). Anything else you type (other
+symbols, HTML tags) will just show up as plain text on the page rather
+than being turned into formatting, so there's no risk of accidentally
+breaking the page's layout.
+
+**One thing to know:** because `#`, `-`, and `>` at the very start of
+a line are treated as formatting, a paragraph that genuinely needs to
+start with one of those characters (e.g. a line beginning "> 50% of
+respondents...") will be misread as a quote. If that happens, just
+add a word before it, or a space, so the line doesn't start with the
+symbol.
+
+---
+
+## Updating the live site
+
+Once your changes are saved and committed to GitHub, the site rebuilds
+and republishes on its own — there's no button to press or command to
+run. Allow a minute or two after pushing.
+
+---
+
+## Troubleshooting
+
+**I want to check my work before pushing to GitHub.** Open the site
+locally (see `README.md` for how) and open your browser's developer
+console (usually F12, or right-click → Inspect → Console). Every page
+load prints an "ARCHIVE VALIDATION" report there, listing:
+
+- Duplicate document or person IDs
+- A document pointing at a volume, person, or related document that
+  doesn't exist
+- Likely duplicate people (similar names under different IDs)
+- Malformed dates
+- Missing titles
+- Duplicate keywords within one document
+
+This report only appears in the browser console — visitors to the
+live site never see it, and a mistake in one document never breaks
+the rest of the site.
+
+**A document isn't showing up on the site at all.** Almost always
+means it was never added to `data/documents.js` — check for both the
+import line and the array entry.
+
+**A person's name shows up as their ID instead (like "P-006") on a
+document page.** Means that ID isn't in `content/people.js` — check
+for a typo in the ID, or that the person was actually added.
+
+**A related document link is missing even though I added it.** Check
+the browser console for a warning — it'll name the exact missing ID.
+
+**I get an error and the page won't load at all.** This usually means
+a typo broke the JavaScript syntax of a content file — a missing
+comma, an unmatched quote mark, or a stray backtick. Compare your file
+closely against `_TEMPLATE.js` or another existing document. If you're
+stuck, it's worth asking the developer to take a look rather than
+guessing further — a syntax error is the one category of mistake that
+can affect the whole site rather than just one document.

@@ -1,0 +1,456 @@
+/*
+  renderer.js
+  -----------
+  Turns content data objects (documents, volumes, people) into HTML.
+  This is where the "context maker never writes HTML" promise is kept:
+  every function here takes plain data and returns markup.
+
+  Content mantainers should never need to edit this file.
+*/
+
+import { DOCUMENTS } from "../data/documents.js";
+import { VOLUMES } from "../data/volumes.js";
+import { PEOPLE } from "../data/people.js";
+import { escapeHtml, buildUrl, formatDateFallback, el } from "./utils.js";
+
+// ---------------------------------------------------------------------
+// Lookups
+// ---------------------------------------------------------------------
+
+const peopleById = new Map(PEOPLE.map((p) => [p.id, p]));
+const volumesById = new Map(VOLUMES.map((v) => [v.id, v]));
+const documentsById = new Map(DOCUMENTS.map((d) => [d.id, d]));
+
+export function getDocument(id) { return documentsById.get(id) || null; }
+export function getVolume(id) { return volumesById.get(id) || null; }
+export function getPerson(id) { return peopleById.get(id) || null; }
+
+export function personName(id) {
+  const p = peopleById.get(id);
+  if (!p) {
+    console.warn(`[archive] Document references unknown person id "${id}".`);
+    return id;
+  }
+  return p.name;
+}
+
+/** Documents belonging to a volume, in display order:
+ *  explicit sortOrder first, then fall back to id, so a volume with
+ *  no sortOrder values set still renders in a stable, sensible order. */
+export function documentsInVolume(volumeId) {
+  return DOCUMENTS.filter((d) => d.volume === volumeId).sort((a, b) => {
+    const sa = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
+    const sb = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
+    if (sa !== sb) return sa - sb;
+    return a.id.localeCompare(b.id);
+  });
+}
+
+export function allVolumesSorted() {
+  return [...VOLUMES].sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
+}
+
+/** All documents referencing a given person, grouped by volume
+ *  (in volume order), matching the automatic-backlink requirement:
+ *  the context maker never maintains this list by hand. */
+export function documentsForPerson(personId) {
+  const docs = DOCUMENTS.filter((d) => (d.people || []).includes(personId));
+  const byVolume = new Map();
+  for (const doc of docs) {
+    if (!byVolume.has(doc.volume)) byVolume.set(doc.volume, []);
+    byVolume.get(doc.volume).push(doc);
+  }
+  return allVolumesSorted()
+    .filter((v) => byVolume.has(v.id))
+    .map((v) => ({ volume: v, documents: documentsInVolume(v.id).filter((d) => byVolume.get(v.id).includes(d)) }));
+}
+
+export function documentCountForVolume(volumeId) {
+  return DOCUMENTS.filter((d) => d.volume === volumeId).length;
+}
+
+// ---------------------------------------------------------------------
+// Context body formatting (the "markdown-lite" renderer)
+// ---------------------------------------------------------------------
+
+/** Strip the light markup down to plain text, for search indexing
+ *  and snippet generation (never shown directly as HTML). */
+export function stripLightMarkup(raw) {
+  if (!raw) return "";
+  return raw
+    .split("\n")
+    .map((line) => line.trim().replace(/^#{1,3}\s+/, "").replace(/^[-*]\s+/, "").replace(/^>\s?/, ""))
+    .join(" ")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Convert a context field's plain text (with a small, controlled set
+ *  of markdown-like conventions) into safe HTML.
+ *
+ *  IMPORTANT ORDER: the block-level syntax ("# ", "- ", "> ") is
+ *  detected on the RAW, unescaped text first, and only the leftover
+ *  leaf content is passed through escapeHtml() right before it goes
+ *  into a tag. Escaping the whole block up front would turn a literal
+ *  ">" into "&gt;" before the blockquote check ever saw it — the
+ *  structure has to be read off the real text, and only the content
+ *  inside it gets escaped. A stray "<" or "&" typed by a content
+ *  maker still can never become a real tag, because every leaf value
+ *  is escaped individually before it's inserted — see spec section 50. */
+export function formatContext(raw) {
+  if (!raw) return "";
+  const trimmed = raw.replace(/\r\n/g, "\n").trim();
+  if (!trimmed) return "";
+
+  // Split into blocks on one-or-more blank lines.
+  const blocks = trimmed.split(/\n\s*\n+/).map((b) => b.trim()).filter(Boolean);
+
+  const html = blocks.map((block) => {
+    const lines = block.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
+    if (lines.length === 0) return "";
+
+    // Heading: a single line starting with 1-3 "#"
+    const headingMatch = /^(#{1,3})\s+(.*)$/.exec(lines[0]);
+    if (lines.length === 1 && headingMatch) {
+      const level = Math.min(headingMatch[1].length + 2, 4); // "#" -> h3, "##"/"###" -> h4
+      return `<h${level}>${inlineFormat(escapeHtml(headingMatch[2]))}</h${level}>`;
+    }
+
+    // Unordered list: every line starts with "- " or "* "
+    if (lines.every((l) => /^[-*]\s+/.test(l))) {
+      const items = lines.map((l) => `<li>${inlineFormat(escapeHtml(l.replace(/^[-*]\s+/, "")))}</li>`).join("");
+      return `<ul>${items}</ul>`;
+    }
+
+    // Blockquote: every line starts with "> "
+    if (lines.every((l) => /^>\s?/.test(l))) {
+      const text = lines.map((l) => inlineFormat(escapeHtml(l.replace(/^>\s?/, "")))).join("<br>");
+      return `<blockquote>${text}</blockquote>`;
+    }
+
+    // Otherwise: a paragraph. Join wrapped lines with a space.
+    return `<p>${inlineFormat(escapeHtml(lines.join(" ")))}</p>`;
+  });
+
+  return html.join("\n");
+}
+
+/** Inline formatting applied within a block: currently just **bold**.
+ *  Always call this AFTER escapeHtml() on the same text (see above),
+ *  so it's operating on already-safe content. */
+function inlineFormat(text) {
+  return text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+
+// ---------------------------------------------------------------------
+// Shared markup fragments
+// ---------------------------------------------------------------------
+
+export function renderBreadcrumb(parts) {
+  const nav = el("nav", { class: "breadcrumb", "aria-label": "Breadcrumb" });
+  parts.forEach((part, i) => {
+    if (i > 0) nav.append(el("span", { class: "sep", "aria-hidden": "true" }, "/"));
+    if (part.href && i < parts.length - 1) {
+      nav.append(el("a", { href: part.href }, part.label));
+    } else {
+      nav.append(el("span", { "aria-current": "page" }, part.label));
+    }
+  });
+  return nav;
+}
+
+export function renderPeopleChips(peopleIds) {
+  if (!peopleIds || peopleIds.length === 0) return null;
+  const ul = el("ul", { class: "chip-list" });
+  for (const pid of peopleIds) {
+    const person = getPerson(pid);
+    const label = person ? person.name : pid;
+    ul.append(el("li", {}, el("a", { class: "chip chip--accent", href: buildUrl("person.html", { id: pid }) }, label)));
+  }
+  return ul;
+}
+
+export function renderKeywordChips(keywords) {
+  if (!keywords || keywords.length === 0) return null;
+  const ul = el("ul", { class: "chip-list" });
+  for (const kw of keywords) {
+    ul.append(el("li", {}, el("a", { class: "chip", href: buildUrl("search.html", { q: kw }) }, kw)));
+  }
+  return ul;
+}
+
+export function renderRelatedDocuments(ids) {
+  if (!ids || ids.length === 0) return null;
+  const grid = el("div", { class: "related-grid" });
+  for (const id of ids) {
+    const doc = getDocument(id);
+    if (!doc) {
+      console.warn(`[archive] Related document reference "${id}" does not exist and was skipped.`);
+      continue;
+    }
+    grid.append(
+      el("a", { class: "related-card", href: buildUrl("document.html", { id: doc.id }) }, [
+        el("span", { class: "related-title" }, doc.title),
+        el("br"),
+        el("span", { class: "related-meta" }, `${doc.id} · ${getVolume(doc.volume)?.title || doc.volume}`),
+      ])
+    );
+  }
+  return grid.childElementCount ? grid : null;
+}
+
+function docMetaLine(doc) {
+  const parts = [];
+  const dateText = doc.dateDisplay || formatDateFallback(doc.date);
+  if (dateText) parts.push(doc.roughTime ? `${dateText} (${doc.roughTime})` : dateText);
+  else if (doc.roughTime) parts.push(doc.roughTime);
+  if (doc.location) parts.push(doc.location);
+  const vol = getVolume(doc.volume);
+  parts.push(vol ? vol.title : doc.volume);
+  return parts;
+}
+
+// ---------------------------------------------------------------------
+// Page renderers
+// ---------------------------------------------------------------------
+
+export function renderNotFound(container, { title, message, backHref = "index.html", backLabel = "Return to the archive" }) {
+  container.replaceChildren(
+    el("div", { class: "empty-state" }, [
+      el("h2", {}, title),
+      el("p", {}, message),
+      el("p", {}, el("a", { href: backHref }, backLabel)),
+    ])
+  );
+}
+
+export function renderHomePage(container) {
+  const volumes = allVolumesSorted();
+  const totalDocs = DOCUMENTS.length;
+
+  const hero = el("div", { class: "home-hero" }, [
+    el("h1", {}, "Document Archive"),
+    el("p", {}, "A searchable collection of contextual records."),
+  ]);
+
+  const searchBox = el("form", { class: "search-page-box", role: "search", action: "search.html" }, [
+    el("label", { for: "home-search-input", class: "visually-hidden" }, "Search the archive"),
+    el("input", { id: "home-search-input", type: "search", name: "q", placeholder: "Search the archive…" }),
+  ]);
+
+  const stats = el("div", { class: "stat-row" }, [
+    el("div", {}, [el("span", { class: "stat-value" }, String(totalDocs)), el("span", { class: "stat-label" }, "Documents")]),
+    el("div", {}, [el("span", { class: "stat-value" }, String(volumes.length)), el("span", { class: "stat-label" }, "Volumes")]),
+    el("div", {}, [el("span", { class: "stat-value" }, String(PEOPLE.length)), el("span", { class: "stat-label" }, "People")]),
+  ]);
+
+  const volumesHeading = el("div", { class: "section-heading" }, [
+    el("h2", { id: "volumes-section" }, "Browse volumes"),
+    el("a", { href: "people.html" }, "Browse people →"),
+  ]);
+  const volumeGrid = el("div", { class: "volume-grid" });
+  for (const v of volumes) {
+    const count = documentCountForVolume(v.id);
+    volumeGrid.append(
+      el("a", { class: "volume-row", href: buildUrl("volume.html", { id: v.id }) }, [
+        el("span", { class: "volume-row-title" }, v.title),
+        el("span", { class: "volume-row-count" }, `${count} document${count === 1 ? "" : "s"}`),
+      ])
+    );
+  }
+
+  const recentHeading = el("h2", {}, "Recently added");
+  const recentList = el("ul", { class: "recent-list" });
+  const recent = DOCUMENTS.slice(-5).reverse();
+  for (const doc of recent) {
+    recentList.append(
+      el("li", {}, [
+        el("a", { class: "recent-title", href: buildUrl("document.html", { id: doc.id }) }, doc.title),
+        el("br"),
+        el("span", { class: "recent-meta" }, docMetaLine(doc).join(" — ")),
+      ])
+    );
+  }
+
+  container.replaceChildren(hero, searchBox, stats, volumesHeading, volumeGrid, recentHeading, recentList);
+}
+
+export function renderVolumePage(container, volumeId) {
+  const volume = getVolume(volumeId);
+  if (!volume) {
+    renderNotFound(container, {
+      title: "Volume not found",
+      message: `No volume was found with the id "${volumeId ?? ""}".`,
+    });
+    return;
+  }
+
+  const docs = documentsInVolume(volume.id);
+  const breadcrumb = renderBreadcrumb([{ label: "Home", href: "index.html" }, { label: volume.title }]);
+
+  const header = el("div", { class: "doc-header" }, [
+    el("span", { class: "id-tag" }, volume.id),
+    el("h1", {}, volume.title),
+  ]);
+
+  const description = volume.description ? el("p", { class: "volume-description" }, volume.description) : null;
+
+  const list = el("ul", { class: "volume-doc-table" });
+  for (const doc of docs) {
+    list.append(
+      el("li", {}, el("a", { href: buildUrl("document.html", { id: doc.id }) }, [
+        el("span", { class: "vdt-title" }, doc.title),
+        el("span", { class: "vdt-meta" }, doc.id),
+      ]))
+    );
+  }
+
+  container.replaceChildren(breadcrumb, header, description, list);
+}
+
+export function renderDocumentPage(container, docId) {
+  const doc = getDocument(docId);
+  if (!doc) {
+    renderNotFound(container, {
+      title: "Document not found",
+      message: `The requested document ("${docId ?? ""}") could not be found.`,
+    });
+    return;
+  }
+
+  const volume = getVolume(doc.volume);
+  const breadcrumb = renderBreadcrumb([
+    { label: "Home", href: "index.html" },
+    { label: volume ? volume.title : doc.volume, href: volume ? buildUrl("volume.html", { id: volume.id }) : null },
+    { label: doc.title },
+  ]);
+
+  const header = el("div", { class: "doc-header" }, [
+    el("span", { class: "id-tag" }, doc.id),
+    el("h1", {}, doc.title),
+    el("div", { class: "doc-meta-row" }, docMetaLine(doc).map((t) => el("span", {}, t))),
+  ]);
+
+  const sections = [];
+
+  if (doc.summary) {
+    sections.push(
+      el("div", { class: "section-block" }, [el("h2", {}, "Summary"), el("p", {}, doc.summary)])
+    );
+  }
+
+  if (doc.context) {
+    const body = el("div", { class: "context-body", html: formatContext(doc.context) });
+    sections.push(el("div", { class: "section-block" }, [el("h2", {}, "Context"), body]));
+  }
+
+  const peopleChips = renderPeopleChips(doc.people);
+  if (peopleChips) sections.push(el("div", { class: "section-block" }, [el("h2", {}, "People / entities"), peopleChips]));
+
+  const keywordChips = renderKeywordChips(doc.keywords);
+  if (keywordChips) sections.push(el("div", { class: "section-block" }, [el("h2", {}, "Keywords"), keywordChips]));
+
+  const related = renderRelatedDocuments(doc.relatedDocuments);
+  if (related) sections.push(el("div", { class: "section-block" }, [el("h2", {}, "Related documents"), related]));
+
+  if (doc.sourceUrl) {
+    sections.push(
+      el("div", { class: "section-block" }, [
+        el("h2", {}, "Source"),
+        el("p", {}, el("a", { href: doc.sourceUrl }, "View original source")),
+      ])
+    );
+  }
+
+  const pager = buildPager(doc);
+
+  container.replaceChildren(breadcrumb, header, ...sections, pager);
+}
+
+function buildPager(doc) {
+  const siblings = documentsInVolume(doc.volume);
+  const idx = siblings.findIndex((d) => d.id === doc.id);
+  const prev = idx > 0 ? siblings[idx - 1] : null;
+  const next = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
+
+  const pager = el("div", { class: "doc-pager" });
+  if (prev) {
+    pager.append(
+      el("a", { href: buildUrl("document.html", { id: prev.id }) }, [
+        el("span", { class: "pager-label" }, "← Previous"),
+        prev.title,
+      ])
+    );
+  } else {
+    pager.append(el("span", { class: "pager-spacer" }));
+  }
+  if (next) {
+    pager.append(
+      el("a", { class: "pager-next", href: buildUrl("document.html", { id: next.id }) }, [
+        el("span", { class: "pager-label" }, "Next →"),
+        next.title,
+      ])
+    );
+  } else {
+    pager.append(el("span", { class: "pager-spacer" }));
+  }
+  return pager;
+}
+
+export function renderPeopleIndexPage(container) {
+  const breadcrumb = renderBreadcrumb([{ label: "Home", href: "index.html" }, { label: "People" }]);
+  const header = el("h1", {}, "People");
+  const list = el("div", { class: "people-index" });
+
+  const sorted = [...PEOPLE].sort((a, b) => a.name.localeCompare(b.name));
+  for (const person of sorted) {
+    const count = DOCUMENTS.filter((d) => (d.people || []).includes(person.id)).length;
+    list.append(
+      el("a", { class: "person-row", href: buildUrl("person.html", { id: person.id }) }, [
+        el("span", {}, person.name),
+        el("span", { class: "person-count" }, `${count} document${count === 1 ? "" : "s"}`),
+      ])
+    );
+  }
+
+  container.replaceChildren(breadcrumb, header, list);
+}
+
+export function renderPersonPage(container, personId) {
+  const person = getPerson(personId);
+  if (!person) {
+    renderNotFound(container, {
+      title: "Person not found",
+      message: `No person was found with the id "${personId ?? ""}".`,
+      backHref: "people.html",
+      backLabel: "Return to people index",
+    });
+    return;
+  }
+
+  const groups = documentsForPerson(person.id);
+  const total = groups.reduce((sum, g) => sum + g.documents.length, 0);
+
+  const breadcrumb = renderBreadcrumb([
+    { label: "Home", href: "index.html" },
+    { label: "People", href: "people.html" },
+    { label: person.name },
+  ]);
+  const header = el("div", { class: "doc-header" }, [
+    el("span", { class: "id-tag" }, person.id),
+    el("h1", {}, person.name),
+    el("p", { class: "meta-line" }, `Referenced in ${total} document${total === 1 ? "" : "s"}`),
+  ]);
+
+  const groupsEl = el("div", {});
+  for (const g of groups) {
+    const list = el("ul", { class: "person-doc-list" });
+    for (const doc of g.documents) {
+      list.append(el("li", {}, el("a", { href: buildUrl("document.html", { id: doc.id }) }, doc.title)));
+    }
+    groupsEl.append(el("div", { class: "person-volume-group" }, [el("h3", {}, g.volume.title), list]));
+  }
+
+  container.replaceChildren(breadcrumb, header, groupsEl);
+}
