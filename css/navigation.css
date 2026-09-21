@@ -166,6 +166,68 @@
   font-weight: 600;
 }
 
+/* Dataset sub-tree: a second collapsible level nested inside a
+   volume's doc list, for volumes that group documents into datasets
+   (mirrors .volume-node/.volume-toggle/.volume-doc-list above, one
+   level further indented). */
+.dataset-node { margin: 0.15em 0; }
+
+.dataset-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--color-ink-muted);
+  padding: 0.35em 0.3em 0.35em 0.8em;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.dataset-toggle:hover { background: var(--color-bg); color: var(--color-ink); }
+
+.dataset-toggle .caret {
+  display: inline-block;
+  width: 0.7em;
+  transition: transform var(--transition-fast);
+  color: var(--color-ink-faint);
+  flex-shrink: 0;
+}
+.dataset-node.is-expanded > .dataset-toggle .caret { transform: rotate(90deg); }
+
+.dataset-doc-list {
+  list-style: none;
+  margin: 0 0 0 1.6em;
+  padding: 0;
+  border-left: 1px solid var(--color-border);
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height var(--transition-med);
+}
+.dataset-node.is-expanded .dataset-doc-list {
+  max-height: 1000px;
+}
+
+.dataset-doc-list li a {
+  display: block;
+  padding: 0.3em 0.3em 0.3em 0.8em;
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  border-left: 2px solid transparent;
+  margin-left: -1px;
+}
+.dataset-doc-list li a:hover {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+.dataset-doc-list li a[aria-current="page"] {
+  color: var(--color-accent);
+  border-left-color: var(--color-accent);
+  font-weight: 600;
+}
+
 .sidebar-link {
   display: block;
   padding: 0.4em 0.3em;

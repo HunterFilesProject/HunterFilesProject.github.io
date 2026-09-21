@@ -17,8 +17,9 @@
 
 import { DOCUMENTS } from "../data/documents.js";
 import { VOLUMES } from "../data/volumes.js";
+import { DATASETS } from "../data/datasets.js";
 import { PEOPLE } from "../data/people.js";
-import { getVolume, getPerson, stripLightMarkup } from "./renderer.js";
+import { getVolume, getDataset, getPerson, stripLightMarkup } from "./renderer.js";
 import { escapeHtml, buildUrl, formatDateFallback, debounce, el } from "./utils.js";
 import { readSearchState, writeSearchState } from "./router.js";
 
@@ -33,6 +34,7 @@ function dateTextFor(doc) {
 
 function buildIndexEntry(doc) {
   const volume = getVolume(doc.volume);
+  const dataset = getDataset(doc.dataset);
   const peopleNames = (doc.people || []).map((id) => getPerson(id)?.name || id);
   const plainContext = stripLightMarkup(doc.context || "");
   const dateText = dateTextFor(doc);
@@ -41,6 +43,8 @@ function buildIndexEntry(doc) {
     doc.id,
     doc.title,
     volume ? volume.title : doc.volume,
+    dataset ? dataset.title : "",
+    doc.status,
     dateText,
     doc.roughTime,
     doc.location,
@@ -56,6 +60,7 @@ function buildIndexEntry(doc) {
   return {
     doc,
     volume,
+    dataset,
     peopleNames,
     plainContext,
     dateText,
@@ -64,6 +69,7 @@ function buildIndexEntry(doc) {
     plainContextLower: plainContext.toLowerCase(),
     locationLower: (doc.location || "").toLowerCase(),
     volumeTitleLower: (volume ? volume.title : doc.volume || "").toLowerCase(),
+    datasetTitleLower: (dataset ? dataset.title : "").toLowerCase(),
     keywordsLower: (doc.keywords || []).map((k) => k.toLowerCase()),
     peopleNamesLower: peopleNames.map((n) => n.toLowerCase()),
     allFieldsLower,
@@ -129,6 +135,7 @@ function scoreEntry(entry, terms, fullQueryLower) {
     if (entry.summaryLower.includes(term)) score += 6;
     if (entry.locationLower.includes(term)) score += 5;
     if (entry.volumeTitleLower.includes(term)) score += 3;
+    if (entry.datasetTitleLower && entry.datasetTitleLower.includes(term)) score += 3;
   }
 
   return score;
@@ -199,6 +206,8 @@ export function runSearch(query, filters = {}) {
 
   let candidates = index.filter((entry) => {
     if (filters.volume && entry.doc.volume !== filters.volume) return false;
+    if (filters.dataset && entry.doc.dataset !== filters.dataset) return false;
+    if (filters.status && entry.doc.status !== filters.status) return false;
     if (filters.person && !(entry.doc.people || []).includes(filters.person)) return false;
     if (filters.keyword && !entry.keywordsLower.includes(filters.keyword.toLowerCase())) return false;
     if (filters.date && entry.dateText !== filters.date) return false;
@@ -241,6 +250,11 @@ function populateSelect(select, options, placeholder) {
 
 function buildFilterOptions() {
   const volumes = [...VOLUMES].sort((a, b) => (a.number ?? 0) - (b.number ?? 0)).map((v) => ({ value: v.id, label: v.title }));
+  const datasets = [...DATASETS].sort((a, b) => (a.number ?? 0) - (b.number ?? 0)).map((d) => ({ value: d.id, label: d.title }));
+  const statuses = [
+    { value: "active", label: "Active" },
+    { value: "deprecated", label: "Deprecated" },
+  ];
   const people = [...PEOPLE].sort((a, b) => a.name.localeCompare(b.name)).map((p) => ({ value: p.id, label: p.name }));
   const keywordSet = new Set();
   DOCUMENTS.forEach((d) => (d.keywords || []).forEach((k) => keywordSet.add(k)));
@@ -251,7 +265,7 @@ function buildFilterOptions() {
     if (t) dateSet.add(t);
   });
   const dates = [...dateSet].sort().map((d) => ({ value: d, label: d }));
-  return { volumes, people, keywords, dates };
+  return { volumes, datasets, statuses, people, keywords, dates };
 }
 
 // ---------------------------------------------------------------------
@@ -261,6 +275,8 @@ function buildFilterOptions() {
 export function initSearchPage() {
   const input = document.getElementById("search-input");
   const volumeSelect = document.getElementById("filter-volume");
+  const datasetSelect = document.getElementById("filter-dataset");
+  const statusSelect = document.getElementById("filter-status");
   const personSelect = document.getElementById("filter-person");
   const keywordSelect = document.getElementById("filter-keyword");
   const dateSelect = document.getElementById("filter-date");
@@ -269,6 +285,8 @@ export function initSearchPage() {
 
   const options = buildFilterOptions();
   populateSelect(volumeSelect, options.volumes, "All volumes");
+  populateSelect(datasetSelect, options.datasets, "All datasets");
+  populateSelect(statusSelect, options.statuses, "All statuses");
   populateSelect(personSelect, options.people, "All people");
   populateSelect(keywordSelect, options.keywords, "All keywords");
   populateSelect(dateSelect, options.dates, "All dates");
@@ -276,6 +294,8 @@ export function initSearchPage() {
   const initial = readSearchState();
   input.value = initial.q;
   volumeSelect.value = initial.volume;
+  datasetSelect.value = initial.dataset;
+  statusSelect.value = initial.status;
   personSelect.value = initial.person;
   keywordSelect.value = initial.keyword;
   dateSelect.value = initial.date;
@@ -283,6 +303,8 @@ export function initSearchPage() {
   function currentFilters() {
     return {
       volume: volumeSelect.value,
+      dataset: datasetSelect.value,
+      status: statusSelect.value,
       person: personSelect.value,
       keyword: keywordSelect.value,
       date: dateSelect.value,
@@ -318,7 +340,7 @@ export function initSearchPage() {
         const snippetHtml = query ? buildSnippet(entry, terms.map((t) => t.toLowerCase()), fullQueryLower) : escapeHtml(doc.summary || "");
         return el("li", { class: "result-item" }, [
           el("a", { class: "result-title", href: buildUrl("document.html", { id: doc.id }) }, doc.title),
-          el("div", { class: "result-meta" }, [doc.id, entry.volume ? entry.volume.title : doc.volume, entry.dateText].filter(Boolean).join(" · ")),
+          el("div", { class: "result-meta" }, [doc.id, entry.volume ? entry.volume.title : doc.volume, entry.dataset ? entry.dataset.title : null, doc.status === "active" ? "Active" : doc.status === "deprecated" ? "Deprecated" : null, entry.dateText].filter(Boolean).join(" · ")),
           el("div", { class: "result-snippet", html: snippetHtml }),
         ]);
       })
@@ -331,7 +353,7 @@ export function initSearchPage() {
 
   const debouncedRender = debounce(render, 150);
   input.addEventListener("input", debouncedRender);
-  [volumeSelect, personSelect, keywordSelect, dateSelect].forEach((s) => s.addEventListener("change", render));
+  [volumeSelect, datasetSelect, statusSelect, personSelect, keywordSelect, dateSelect].forEach((s) => s.addEventListener("change", render));
 
   render();
 }

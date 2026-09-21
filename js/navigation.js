@@ -8,10 +8,11 @@
   Content maintainers should never need to edit this file.
 */
 
-import { allVolumesSorted, documentsInVolume } from "./renderer.js";
+import { allVolumesSorted, documentsInVolume, datasetsInVolume, documentsInDataset, documentsInVolumeWithoutDataset } from "./renderer.js";
 import { el, buildUrl } from "./utils.js";
 
 const EXPANDED_KEY = "archive:expandedVolumes";
+const EXPANDED_DATASETS_KEY = "archive:expandedDatasets";
 const THEME_KEY = "archive:theme";
 
 function getExpandedVolumes() {
@@ -31,6 +32,23 @@ function saveExpandedVolumes(set) {
   }
 }
 
+function getExpandedDatasets() {
+  try {
+    const raw = localStorage.getItem(EXPANDED_DATASETS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveExpandedDatasets(set) {
+  try {
+    localStorage.setItem(EXPANDED_DATASETS_KEY, JSON.stringify([...set]));
+  } catch {
+    /* localStorage unavailable (private browsing, etc.) — degrade silently */
+  }
+}
+
 function getStoredTheme() {
   try {
     return localStorage.getItem(THEME_KEY);
@@ -42,7 +60,9 @@ function getStoredTheme() {
 function effectiveTheme() {
   const stored = getStoredTheme();
   if (stored) return stored;
-  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  // Dark is the site's default. A visitor's own explicit choice (via
+  // the toggle button) always overrides this, in either direction.
+  return "dark";
 }
 
 function applyTheme(theme) {
@@ -124,8 +144,9 @@ export function renderHeader(container, { activePage }) {
   });
 }
 
-export function renderSidebar(container, { activeDocId, activeVolumeId } = {}) {
+export function renderSidebar(container, { activeDocId, activeVolumeId, activeDatasetId } = {}) {
   const expanded = getExpandedVolumes();
+  const expandedDatasets = getExpandedDatasets();
 
   // Auto-expand the volume containing the current document/volume page,
   // without permanently changing what the user has toggled themselves.
@@ -148,11 +169,53 @@ export function renderSidebar(container, { activeDocId, activeVolumeId } = {}) {
       volume.title,
     ]);
 
+    const datasets = datasetsInVolume(volume.id);
     const docList = el("ul", { class: "volume-doc-list" });
-    for (const doc of documentsInVolume(volume.id)) {
-      const a = el("a", { href: buildUrl("document.html", { id: doc.id }) }, doc.title);
-      if (doc.id === activeDocId) a.setAttribute("aria-current", "page");
-      docList.append(el("li", {}, a));
+
+    if (datasets.length === 0) {
+      // Flat volume: list its documents directly, as before.
+      for (const doc of documentsInVolume(volume.id)) {
+        const a = el("a", { href: buildUrl("document.html", { id: doc.id }) }, doc.title);
+        if (doc.id === activeDocId) a.setAttribute("aria-current", "page");
+        docList.append(el("li", {}, a));
+      }
+    } else {
+      // Grouped volume: standalone documents first, then each dataset
+      // as its own collapsible sub-tree.
+      for (const doc of documentsInVolumeWithoutDataset(volume.id)) {
+        const a = el("a", { href: buildUrl("document.html", { id: doc.id }) }, doc.title);
+        if (doc.id === activeDocId) a.setAttribute("aria-current", "page");
+        docList.append(el("li", {}, a));
+      }
+
+      for (const ds of datasets) {
+        const dsExpanded = expandedDatasets.has(ds.id) || ds.id === activeDatasetId;
+        const dsNode = el("li", { class: `dataset-node${dsExpanded ? " is-expanded" : ""}` });
+
+        const dsToggle = el("button", { class: "dataset-toggle", type: "button", "aria-expanded": String(dsExpanded) }, [
+          el("span", { class: "caret", "aria-hidden": "true" }, "▸"),
+          ds.title,
+        ]);
+
+        const dsDocList = el("ul", { class: "dataset-doc-list" });
+        for (const doc of documentsInDataset(ds.id)) {
+          const a = el("a", { href: buildUrl("document.html", { id: doc.id }) }, doc.title);
+          if (doc.id === activeDocId) a.setAttribute("aria-current", "page");
+          dsDocList.append(el("li", {}, a));
+        }
+
+        dsToggle.addEventListener("click", () => {
+          const nowExpanded = dsNode.classList.toggle("is-expanded");
+          dsToggle.setAttribute("aria-expanded", String(nowExpanded));
+          const set = getExpandedDatasets();
+          if (nowExpanded) set.add(ds.id);
+          else set.delete(ds.id);
+          saveExpandedDatasets(set);
+        });
+
+        dsNode.append(dsToggle, dsDocList);
+        docList.append(dsNode);
+      }
     }
 
     toggle.addEventListener("click", () => {

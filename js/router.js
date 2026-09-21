@@ -25,6 +25,8 @@ export function readSearchState() {
   return {
     q: usp.get("q") || "",
     volume: usp.get("volume") || "",
+    dataset: usp.get("dataset") || "",
+    status: usp.get("status") || "",
     person: usp.get("person") || "",
     keyword: usp.get("keyword") || "",
     date: usp.get("date") || "",
@@ -36,7 +38,7 @@ export function readSearchState() {
  *  useful and a copied URL still reproduces the same search. */
 export function writeSearchState(state) {
   const usp = new URLSearchParams();
-  for (const key of ["q", "volume", "person", "keyword", "date"]) {
+  for (const key of ["q", "volume", "dataset", "status", "person", "keyword", "date"]) {
     if (state[key]) usp.set(key, state[key]);
   }
   const qs = usp.toString();

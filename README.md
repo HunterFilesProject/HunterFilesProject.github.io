@@ -18,7 +18,7 @@ The project is split into two layers:
   the code that turns content into pages: navigation, search,
   rendering, routing. You shouldn't need to edit this to add content.
 - **`content/` and `data/`** — the archive's actual content. Documents,
-  volumes, and people live here as plain JavaScript objects.
+  volumes, datasets, and people live here as plain JavaScript objects.
 
 Each page (`document.html`, `volume.html`, `person.html`, etc.) is a
 mostly-empty HTML shell. When it loads, `js/app.js` figures out which
@@ -26,13 +26,21 @@ page it is, reads the relevant content from `data/`, and builds the
 page's contents in the browser. Nothing is server-rendered — it's all
 plain client-side JavaScript, no framework or build step involved.
 
+The site defaults to dark mode for first-time visitors, regardless of
+their system preference. The toggle button in the header switches
+between light and dark; once someone uses it, their explicit choice
+is remembered (in their own browser's `localStorage`) and always wins
+over the default from then on. This is controlled entirely in
+`js/navigation.js` (`effectiveTheme()`) — not something content
+editors need to touch.
+
 Because each page type is its own real `.html` file (rather than a
 single-page app), the browser's back/forward buttons and history work
 correctly for free — there's no client-side router to get that wrong.
 
-Search results and deep links (`document.html?id=DOC-001`,
+Search results and deep links (`document.html?id=HF1%230001`,
 `person.html?id=P-003`, `search.html?q=...`) are done via query-string
-parameters rather than clean URL paths like `/documents/doc-001/`.
+parameters rather than clean URL paths like `/documents/hf1-0001/`.
 This was a deliberate choice: GitHub Pages doesn't do server-side URL
 rewriting, and the usual workaround for "clean URLs" on GitHub Pages
 (a redirect trick through a custom 404 page) adds real fragility for
@@ -75,6 +83,9 @@ written for a non-programmer. The short version:
 - **Add a person:** add a `{ id, name }` entry to `content/people.js`.
 - **Add a volume:** copy an existing file in `content/volumes/`, then
   add one import line and one array entry in `data/volumes.js`.
+- **Add a dataset** (an optional sub-grouping of documents within one
+  volume): copy an existing file in `content/datasets/`, then add one
+  import line and one array entry in `data/datasets.js`.
 
 In every case, you're only ever editing plain data — no HTML, CSS, or
 the site's JavaScript.
@@ -103,40 +114,68 @@ No environment variables, secrets, or build configuration are needed.
 
 ```text
 document-archive/
-├── index.html, search.html, volume.html, document.html,
-│   people.html, person.html, about.html, 404.html   ← page shells
+├── index.html, search.html, volume.html, dataset.html,
+│   document.html, people.html, person.html, about.html,
+│   404.html                                          ← page shells
 ├── css/            ← visual styling (engine)
 ├── js/             ← navigation, rendering, search, routing (engine)
 ├── data/           ← registries: the arrays the engine actually reads
 ├── content/
-│   ├── documents/  ← one file per document, plus _TEMPLATE.js
+│   ├── documents/  ← one file per document, plus _TEMPLATE.js.
+│   │                 Flat per volume by default; a volume that uses
+│   │                 datasets (currently just volume 2) nests its
+│   │                 files under volume-N/dataset-NN/ instead — see
+│   │                 CONTENT_GUIDE.md. This nesting is cosmetic only;
+│   │                 the engine only cares about data/documents.js.
 │   ├── volumes/    ← one file per volume
+│   ├── datasets/   ← one file per dataset (a sub-grouping of
+│   │                 documents within one volume; optional per volume)
 │   └── people.js   ← every person, in one file
 ├── assets/         ← images/icons, if you add any
 ├── README.md       ← this file
 └── CONTENT_GUIDE.md
 ```
 
-## Scaling beyond the test dataset
+## Current archive at a glance
 
-The test dataset ships with 3 volumes, 10 documents, and 5 people to
-demonstrate every feature (search, filtering, person backlinks,
-related documents, previous/next navigation, light markdown
-formatting). The architecture is built to grow from there:
+- **Volume 1** — 76 documents (`HF1#0001`–`HF1#0076`, `HF1#0022` is
+  intentionally missing), no datasets; shown as a flat list.
+- **Volume 2** — 100 documents (`HF2#0001`–`HF2#0100`). `HF2#0001`
+  stands alone; the other 99 are split across 13 datasets
+  (`DS-02`–`DS-14`). Shown as a grouped view on the site.
+- **10 people**, **175 documents**, **2 volumes**, **13 datasets** in
+  total. The architecture is built to grow well past this — see
+  below.
+- Every document is currently marked **`status: "deprecated"`** (all
+  175 are still empty stubs) and has no `lastUpdated` date set. Flip a
+  document to `"active"` and give it a `lastUpdated` date once it's
+  actually been reviewed and filled in — see the field table in
+  `CONTENT_GUIDE.md`.
+
+## Scaling further
+
+The architecture is built to keep growing past where it is today:
 
 - Adding documents is always the same two-step process (copy a
-  template, register it), whether you have 10 documents or 10,000.
+  template, register it), whether a volume has 10 documents or
+  10,000.
 - All search indexing, navigation, and cross-referencing is generated
   automatically from `data/` — nothing needs manual upkeep as the
   archive grows.
-- **One thing worth deciding early if you expect to pass ~900
-  documents:** IDs in this dataset use 3 digits (`DOC-001`). That's
-  comfortable up to `DOC-999`; past that, plain-text sorting of IDs
-  stops matching numeric order (`"DOC-1000"` sorts before `"DOC-999"`
-  as text). If you expect to grow into the thousands, switch to a
-  wider zero-padded format (`DOC-00001`) before you're deep into data
-  entry — it's a bigger job to rename IDs after other documents have
-  already linked to them via `relatedDocuments`.
+- Datasets exist for exactly this reason: once a volume gets large
+  enough that one flat list stops being useful to browse (volume 2
+  already crossed that line at 100 documents), splitting it into
+  datasets keeps both the sidebar and the volume page manageable
+  without changing how documents themselves work.
+- **One thing worth knowing about the ID scheme:** ids are
+  `HF<volume number>#<4-digit number>` (e.g. `HF1#0001`), which is
+  comfortable up to `HF1#9999` per volume; past that, plain-text
+  sorting of ids stops matching numeric order (`"HF1#10000"` sorts
+  before `"HF1#9999"` as text, since it's shorter). If any one volume
+  is ever going to pass ~9,999 documents, widen that volume's numbers
+  to 5 digits before you're deep into data entry for it — it's a
+  bigger job to rename ids after other documents have already linked
+  to them via `relatedDocuments`.
 - If the archive grows into the thousands of documents and the
   hand-rolled search in `js/search.js` starts to feel slow or its
   ranking starts to feel too simple, that file is intentionally

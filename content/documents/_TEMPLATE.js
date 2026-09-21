@@ -23,6 +23,15 @@
     This is the ONLY place a document's volume membership is set —
     volume files do not list their own documents.
 
+  dataset
+    Optional. The id of a dataset (a sub-grouping of documents within
+    one volume — see content/datasets/), e.g. "DS-02". Use `null` if
+    this document doesn't belong to a dataset (either because its
+    volume has none, or because it stands alone within a volume that
+    does). Like `volume`, this is the ONLY place the membership is
+    set — a dataset file never lists its own documents. A dataset's
+    own `volume` field must match this document's `volume`.
+
   sortOrder
     Optional. A number controlling this document's position within
     its volume (lower numbers come first). If you leave every
@@ -32,6 +41,14 @@
 
   title
     The document's display title. Required.
+
+  status
+    Required. Either "active" (current, relevant information) or
+    "deprecated" (not being kept up to date). New/unfilled stubs
+    should generally start as "deprecated" until someone has actually
+    reviewed and entered real content — flip it to "active" at that
+    point. Shown as a small badge on the document page and in
+    document lists.
 
   date
     Optional. Machine-readable date, as "YYYY-MM-DD", "YYYY-MM", or
@@ -83,13 +100,23 @@
   sourceUrl
     Optional. A link to the original source file/image, if one is
     hosted somewhere. Leave this out entirely if there isn't one.
+
+  lastUpdated
+    Optional but recommended. The date you last made a real content
+    change to this document (not just touched the file), as
+    "YYYY-MM-DD". Use `null` if it's never actually been updated.
+    Shown at the bottom of the document page. This is maintained by
+    hand — update it yourself whenever you edit a document's content;
+    nothing sets it automatically.
 */
 
 export const DOC_TEMPLATE = {
   id: "HF1#XXXX",
   volume: "VOL-01",
+  dataset: null,
   sortOrder: null,
   title: "",
+  status: "deprecated",
   date: "",
   dateDisplay: "",
   roughTime: "",
@@ -101,4 +128,5 @@ export const DOC_TEMPLATE = {
 
 `,
   relatedDocuments: [],
+  lastUpdated: null,
 };

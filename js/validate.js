@@ -9,6 +9,7 @@
 
 import { DOCUMENTS } from "../data/documents.js";
 import { VOLUMES } from "../data/volumes.js";
+import { DATASETS } from "../data/datasets.js";
 import { PEOPLE } from "../data/people.js";
 
 function isMalformedDate(dateStr) {
@@ -28,6 +29,7 @@ export function runValidation() {
   const errors = [];
 
   const volumeIds = new Set(VOLUMES.map((v) => v.id));
+  const datasetIds = new Set(DATASETS.map((d) => d.id));
   const personIds = new Set(PEOPLE.map((p) => p.id));
   const documentIds = new Set(DOCUMENTS.map((d) => d.id));
 
@@ -38,6 +40,15 @@ export function runValidation() {
   }
   for (const [id, count] of seenDocIds) {
     if (count > 1) errors.push(`Duplicate document ID "${id}" appears ${count} times.`);
+  }
+
+  // Duplicate dataset IDs
+  const seenDatasetIds = new Map();
+  for (const d of DATASETS) {
+    seenDatasetIds.set(d.id, (seenDatasetIds.get(d.id) || 0) + 1);
+  }
+  for (const [id, count] of seenDatasetIds) {
+    if (count > 1) errors.push(`Duplicate dataset ID "${id}" appears ${count} times.`);
   }
 
   // Duplicate person IDs
@@ -68,7 +79,26 @@ export function runValidation() {
     if (!d.volume) errors.push(`Document "${d.id}" is missing a "volume" field.`);
     else if (!volumeIds.has(d.volume)) warnings.push(`Document "${d.id}" references missing volume "${d.volume}".`);
 
+    if (d.dataset) {
+      if (!datasetIds.has(d.dataset)) {
+        warnings.push(`Document "${d.id}" references missing dataset "${d.dataset}".`);
+      } else {
+        const ds = DATASETS.find((x) => x.id === d.dataset);
+        if (ds && d.volume && ds.volume !== d.volume) {
+          warnings.push(`Document "${d.id}" is in volume "${d.volume}" but its dataset "${d.dataset}" belongs to volume "${ds.volume}".`);
+        }
+      }
+    }
+
     if (isMalformedDate(d.date)) warnings.push(`Document "${d.id}" has a malformed date: "${d.date}". Expected YYYY-MM-DD, YYYY-MM, or YYYY.`);
+
+    if (d.status !== "active" && d.status !== "deprecated") {
+      warnings.push(`Document "${d.id}" has an invalid or missing "status" (must be "active" or "deprecated"), got: ${JSON.stringify(d.status)}.`);
+    }
+
+    if (d.lastUpdated && isMalformedDate(d.lastUpdated)) {
+      warnings.push(`Document "${d.id}" has a malformed "lastUpdated" date: "${d.lastUpdated}". Expected YYYY-MM-DD, YYYY-MM, or YYYY.`);
+    }
 
     for (const pid of d.people || []) {
       if (!personIds.has(pid)) warnings.push(`Document "${d.id}" references missing person "${pid}".`);
@@ -92,9 +122,16 @@ export function runValidation() {
     if (!v.title || !v.title.trim()) errors.push(`Volume "${v.id || "?"}" has an empty title.`);
   }
 
+  for (const ds of DATASETS) {
+    if (!ds.id) errors.push(`A dataset is missing an "id" field.`);
+    if (!ds.title || !ds.title.trim()) errors.push(`Dataset "${ds.id || "?"}" has an empty title.`);
+    if (!ds.volume) errors.push(`Dataset "${ds.id}" is missing a "volume" field.`);
+    else if (!volumeIds.has(ds.volume)) warnings.push(`Dataset "${ds.id}" references missing volume "${ds.volume}".`);
+  }
+
   // ---- Print results ----
   console.groupCollapsed(
-    `%cARCHIVE VALIDATION%c — ${DOCUMENTS.length} documents, ${VOLUMES.length} volumes, ${PEOPLE.length} people`,
+    `%cARCHIVE VALIDATION%c — ${DOCUMENTS.length} documents, ${VOLUMES.length} volumes, ${DATASETS.length} datasets, ${PEOPLE.length} people`,
     "font-weight: bold;",
     "font-weight: normal;"
   );

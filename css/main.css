@@ -5,15 +5,20 @@
 
   Palette concept: an archival records room, not a marketing site.
   Cool paper-grey surfaces, ink-dark text, and a single "records stamp"
-  red used sparingly for links and active states. Light mode is the
-  default; dark mode overrides the same custom properties.
+  red used sparingly for links and active states. Dark mode is the
+  site's default (see js/navigation.js effectiveTheme()); light mode
+  is available via the toggle in the header and overrides the same
+  custom properties.
 
   NOTE FOR MAINTAINERS: you should never need to edit this file to add
   or change document content. This file only controls the site's look.
 */
 
 :root {
-  /* -- Color: light (default) -- */
+  /* -- Color: base values (used as-is only before JS runs, or if JS
+        is unavailable; js/navigation.js sets data-theme="dark" on
+        every normal page load, which overrides these via the rule
+        below) -- */
   --color-bg:            #EEF0EA;
   --color-surface:       #FBFBF8;
   --color-surface-raised:#FFFFFF;
@@ -184,6 +189,37 @@ code, .mono {
   border-radius: var(--radius-sm);
   padding: 0.1em 0.45em;
   background: var(--color-surface);
+  margin-right: var(--space-2);
+}
+
+/* Status badge: whether a document is actively maintained (active)
+   or no longer being updated (deprecated). Reuses existing theme
+   colors rather than introducing new palette variables, so it's
+   correct in both light and dark automatically. */
+.status-badge {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  padding: 0.1em 0.5em;
+  white-space: nowrap;
+}
+.status-badge.status-active {
+  color: var(--color-focus);
+  border-color: var(--color-focus);
+}
+.status-badge.status-deprecated {
+  color: var(--color-ink-faint);
+  border-color: var(--color-border-strong);
+}
+.status-badge.status-unknown {
+  color: var(--color-ink-faint);
+  border-color: var(--color-border);
+  font-style: italic;
 }
 
 .chip-list {

@@ -1,8 +1,10 @@
 export const HF1_0020 = {
   id: "HF1#0020",
   volume: "VOL-01",
+  dataset: null,
   sortOrder: null,
   title: "HF1#0020",
+  status: "deprecated",
   date: "",
   dateDisplay: "",
   roughTime: "",
@@ -14,4 +16,5 @@ export const HF1_0020 = {
 
 `,
   relatedDocuments: [],
+  lastUpdated: null,
 };

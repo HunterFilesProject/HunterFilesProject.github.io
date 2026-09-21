@@ -14,10 +14,12 @@ import { renderHeader, renderSidebar, initTheme } from "./navigation.js";
 import {
   renderHomePage,
   renderVolumePage,
+  renderDatasetPage,
   renderDocumentPage,
   renderPeopleIndexPage,
   renderPersonPage,
   getDocument,
+  getDataset,
 } from "./renderer.js";
 import { getQueryParam } from "./utils.js";
 import { runValidation } from "./validate.js";
@@ -40,17 +42,25 @@ function boot() {
 
   let activeDocId = null;
   let activeVolumeId = null;
+  let activeDatasetId = null;
 
   if (pageType === "document") {
     activeDocId = getQueryParam("id");
     const doc = getDocument(activeDocId);
-    if (doc) activeVolumeId = doc.volume;
+    if (doc) {
+      activeVolumeId = doc.volume;
+      activeDatasetId = doc.dataset || null;
+    }
   } else if (pageType === "volume") {
     activeVolumeId = getQueryParam("id");
+  } else if (pageType === "dataset") {
+    activeDatasetId = getQueryParam("id");
+    const ds = getDataset(activeDatasetId);
+    if (ds) activeVolumeId = ds.volume;
   }
 
   if (headerEl) renderHeader(headerEl, { activePage: pageType });
-  if (sidebarEl) renderSidebar(sidebarEl, { activeDocId, activeVolumeId });
+  if (sidebarEl) renderSidebar(sidebarEl, { activeDocId, activeVolumeId, activeDatasetId });
 
   if (contentEl) {
     switch (pageType) {
@@ -59,6 +69,9 @@ function boot() {
         break;
       case "volume":
         renderVolumePage(contentEl, getQueryParam("id"));
+        break;
+      case "dataset":
+        renderDatasetPage(contentEl, getQueryParam("id"));
         break;
       case "document":
         renderDocumentPage(contentEl, getQueryParam("id"));

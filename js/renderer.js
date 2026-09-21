@@ -10,6 +10,7 @@
 
 import { DOCUMENTS } from "../data/documents.js";
 import { VOLUMES } from "../data/volumes.js";
+import { DATASETS } from "../data/datasets.js";
 import { PEOPLE } from "../data/people.js";
 import { escapeHtml, buildUrl, formatDateFallback, el } from "./utils.js";
 
@@ -19,10 +20,12 @@ import { escapeHtml, buildUrl, formatDateFallback, el } from "./utils.js";
 
 const peopleById = new Map(PEOPLE.map((p) => [p.id, p]));
 const volumesById = new Map(VOLUMES.map((v) => [v.id, v]));
+const datasetsById = new Map(DATASETS.map((d) => [d.id, d]));
 const documentsById = new Map(DOCUMENTS.map((d) => [d.id, d]));
 
 export function getDocument(id) { return documentsById.get(id) || null; }
 export function getVolume(id) { return volumesById.get(id) || null; }
+export function getDataset(id) { return id ? datasetsById.get(id) || null : null; }
 export function getPerson(id) { return peopleById.get(id) || null; }
 
 export function personName(id) {
@@ -36,7 +39,10 @@ export function personName(id) {
 
 /** Documents belonging to a volume, in display order:
  *  explicit sortOrder first, then fall back to id, so a volume with
- *  no sortOrder values set still renders in a stable, sensible order. */
+ *  no sortOrder values set still renders in a stable, sensible order.
+ *  Includes ALL of a volume's documents regardless of dataset — use
+ *  this for whole-volume counts/fallbacks, not for a dataset's own
+ *  page (see documentsInDataset). */
 export function documentsInVolume(volumeId) {
   return DOCUMENTS.filter((d) => d.volume === volumeId).sort((a, b) => {
     const sa = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
@@ -46,8 +52,37 @@ export function documentsInVolume(volumeId) {
   });
 }
 
+/** A volume's documents that do NOT belong to any dataset — the
+ *  documents a volume-with-datasets page still needs to show on
+ *  their own, outside any dataset group. */
+export function documentsInVolumeWithoutDataset(volumeId) {
+  return documentsInVolume(volumeId).filter((d) => !d.dataset);
+}
+
 export function allVolumesSorted() {
   return [...VOLUMES].sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
+}
+
+/** Datasets belonging to a volume, in number order. Returns an empty
+ *  array for a volume that doesn't use datasets (e.g. volume 1) —
+ *  callers should treat that as "render this volume flat". */
+export function datasetsInVolume(volumeId) {
+  return DATASETS.filter((ds) => ds.volume === volumeId).sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
+}
+
+/** Documents belonging to a dataset, in the same sortOrder-then-id
+ *  order as documentsInVolume. */
+export function documentsInDataset(datasetId) {
+  return DOCUMENTS.filter((d) => d.dataset === datasetId).sort((a, b) => {
+    const sa = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
+    const sb = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
+    if (sa !== sb) return sa - sb;
+    return a.id.localeCompare(b.id);
+  });
+}
+
+export function documentCountForDataset(datasetId) {
+  return DOCUMENTS.filter((d) => d.dataset === datasetId).length;
 }
 
 /** All documents referencing a given person, grouped by volume
@@ -200,6 +235,12 @@ export function renderRelatedDocuments(ids) {
   return grid.childElementCount ? grid : null;
 }
 
+export function renderStatusBadge(status) {
+  const known = status === "active" || status === "deprecated";
+  const label = known ? (status === "active" ? "Active" : "Deprecated") : "Status unknown";
+  return el("span", { class: `status-badge status-${known ? status : "unknown"}` }, label);
+}
+
 function docMetaLine(doc) {
   const parts = [];
   const dateText = doc.dateDisplay || formatDateFallback(doc.date);
@@ -208,6 +249,8 @@ function docMetaLine(doc) {
   if (doc.location) parts.push(doc.location);
   const vol = getVolume(doc.volume);
   parts.push(vol ? vol.title : doc.volume);
+  const ds = getDataset(doc.dataset);
+  if (ds) parts.push(ds.title);
   return parts;
 }
 
@@ -242,6 +285,7 @@ export function renderHomePage(container) {
   const stats = el("div", { class: "stat-row" }, [
     el("div", {}, [el("span", { class: "stat-value" }, String(totalDocs)), el("span", { class: "stat-label" }, "Documents")]),
     el("div", {}, [el("span", { class: "stat-value" }, String(volumes.length)), el("span", { class: "stat-label" }, "Volumes")]),
+    el("div", {}, [el("span", { class: "stat-value" }, String(DATASETS.length)), el("span", { class: "stat-label" }, "Datasets")]),
     el("div", {}, [el("span", { class: "stat-value" }, String(PEOPLE.length)), el("span", { class: "stat-label" }, "People")]),
   ]);
 
@@ -286,7 +330,6 @@ export function renderVolumePage(container, volumeId) {
     return;
   }
 
-  const docs = documentsInVolume(volume.id);
   const breadcrumb = renderBreadcrumb([{ label: "Home", href: "index.html" }, { label: volume.title }]);
 
   const header = el("div", { class: "doc-header" }, [
@@ -296,15 +339,87 @@ export function renderVolumePage(container, volumeId) {
 
   const description = volume.description ? el("p", { class: "volume-description" }, volume.description) : null;
 
+  const datasets = datasetsInVolume(volume.id);
+
+  if (datasets.length === 0) {
+    // Flat volume: no dataset sub-grouping, list every document directly.
+    const list = renderDocTable(documentsInVolume(volume.id));
+    container.replaceChildren(breadcrumb, header, description, list);
+    return;
+  }
+
+  // Grouped volume: show any standalone (no-dataset) documents first,
+  // then each dataset as a browsable group.
+  const sections = [];
+
+  const standalone = documentsInVolumeWithoutDataset(volume.id);
+  if (standalone.length > 0) {
+    sections.push(
+      el("div", { class: "section-block" }, [
+        el("h2", {}, "Not part of a dataset"),
+        renderDocTable(standalone),
+      ])
+    );
+  }
+
+  const datasetsHeading = el("h2", {}, "Datasets");
+  const datasetGrid = el("div", { class: "volume-grid" });
+  for (const ds of datasets) {
+    const count = documentCountForDataset(ds.id);
+    datasetGrid.append(
+      el("a", { class: "volume-row", href: buildUrl("dataset.html", { id: ds.id }) }, [
+        el("span", { class: "volume-row-title" }, ds.title),
+        el("span", { class: "volume-row-count" }, `${count} document${count === 1 ? "" : "s"}`),
+      ])
+    );
+  }
+  sections.push(el("div", { class: "section-block" }, [datasetsHeading, datasetGrid]));
+
+  container.replaceChildren(breadcrumb, header, description, ...sections);
+}
+
+function renderDocTable(docs) {
   const list = el("ul", { class: "volume-doc-table" });
   for (const doc of docs) {
     list.append(
       el("li", {}, el("a", { href: buildUrl("document.html", { id: doc.id }) }, [
-        el("span", { class: "vdt-title" }, doc.title),
+        el("span", { class: "vdt-left" }, [
+          el("span", { class: "vdt-title" }, doc.title),
+          renderStatusBadge(doc.status),
+        ]),
         el("span", { class: "vdt-meta" }, doc.id),
       ]))
     );
   }
+  return list;
+}
+
+export function renderDatasetPage(container, datasetId) {
+  const dataset = getDataset(datasetId);
+  if (!dataset) {
+    renderNotFound(container, {
+      title: "Dataset not found",
+      message: `No dataset was found with the id "${datasetId ?? ""}".`,
+    });
+    return;
+  }
+
+  const volume = getVolume(dataset.volume);
+  const docs = documentsInDataset(dataset.id);
+  const breadcrumb = renderBreadcrumb([
+    { label: "Home", href: "index.html" },
+    { label: volume ? volume.title : dataset.volume, href: volume ? buildUrl("volume.html", { id: volume.id }) : null },
+    { label: dataset.title },
+  ]);
+
+  const header = el("div", { class: "doc-header" }, [
+    el("span", { class: "id-tag" }, dataset.id),
+    el("h1", {}, dataset.title),
+  ]);
+
+  const description = dataset.description ? el("p", { class: "volume-description" }, dataset.description) : null;
+
+  const list = renderDocTable(docs);
 
   container.replaceChildren(breadcrumb, header, description, list);
 }
@@ -320,14 +435,18 @@ export function renderDocumentPage(container, docId) {
   }
 
   const volume = getVolume(doc.volume);
-  const breadcrumb = renderBreadcrumb([
+  const dataset = getDataset(doc.dataset);
+  const crumbParts = [
     { label: "Home", href: "index.html" },
     { label: volume ? volume.title : doc.volume, href: volume ? buildUrl("volume.html", { id: volume.id }) : null },
-    { label: doc.title },
-  ]);
+  ];
+  if (dataset) crumbParts.push({ label: dataset.title, href: buildUrl("dataset.html", { id: dataset.id }) });
+  crumbParts.push({ label: doc.title });
+  const breadcrumb = renderBreadcrumb(crumbParts);
 
   const header = el("div", { class: "doc-header" }, [
     el("span", { class: "id-tag" }, doc.id),
+    renderStatusBadge(doc.status),
     el("h1", {}, doc.title),
     el("div", { class: "doc-meta-row" }, docMetaLine(doc).map((t) => el("span", {}, t))),
   ]);
@@ -365,11 +484,17 @@ export function renderDocumentPage(container, docId) {
 
   const pager = buildPager(doc);
 
-  container.replaceChildren(breadcrumb, header, ...sections, pager);
+  const lastUpdatedText = doc.lastUpdated ? formatDateFallback(doc.lastUpdated) : "Not recorded yet";
+  const footer = el("footer", { class: "doc-footer" }, [
+    el("span", { class: "doc-footer-label" }, "Last updated: "),
+    el("span", {}, lastUpdatedText),
+  ]);
+
+  container.replaceChildren(breadcrumb, header, ...sections, pager, footer);
 }
 
 function buildPager(doc) {
-  const siblings = documentsInVolume(doc.volume);
+  const siblings = doc.dataset ? documentsInDataset(doc.dataset) : documentsInVolume(doc.volume);
   const idx = siblings.findIndex((d) => d.id === doc.id);
   const prev = idx > 0 ? siblings[idx - 1] : null;
   const next = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
