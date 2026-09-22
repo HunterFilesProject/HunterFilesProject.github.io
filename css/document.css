@@ -19,6 +19,23 @@
   margin-bottom: var(--space-1);
 }
 
+.doc-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-6);
+}
+.doc-action-btn {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.35em 0.8em;
+  cursor: pointer;
+}
+.doc-action-btn:hover { color: var(--color-ink); border-color: var(--color-border-strong); }
+
 .section-block { margin: var(--space-6) 0; }
 .section-block h2 {
   font-size: var(--text-sm);
@@ -96,6 +113,53 @@
 
 .person-doc-list { list-style: none; margin: 0; padding: 0; }
 .person-doc-list li { padding: 0.3em 0; }
+
+.empty-state {
+  color: var(--color-ink-muted);
+  max-width: 60ch;
+  padding: var(--space-4) 0;
+}
+
+.progress-bar {
+  height: 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--color-focus);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+.progress-bar-label {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  margin-top: var(--space-2);
+}
+
+.dashboard-rows {
+  display: grid;
+  gap: var(--space-3);
+}
+.dashboard-row {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+.dashboard-row:hover { border-color: var(--color-border-strong); text-decoration: none; }
+.dashboard-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.dashboard-row-title { font-family: var(--font-serif); }
+.dashboard-row-count { font-size: var(--text-xs); color: var(--color-ink-muted); white-space: nowrap; }
 
 .volume-description {
   color: var(--color-ink-muted);

@@ -210,7 +210,7 @@ export function renderKeywordChips(keywords) {
   if (!keywords || keywords.length === 0) return null;
   const ul = el("ul", { class: "chip-list" });
   for (const kw of keywords) {
-    ul.append(el("li", {}, el("a", { class: "chip", href: buildUrl("search.html", { q: kw }) }, kw)));
+    ul.append(el("li", {}, el("a", { class: "chip", href: buildUrl("keyword.html", { kw }) }, kw)));
   }
   return ul;
 }
@@ -451,6 +451,11 @@ export function renderDocumentPage(container, docId) {
     el("div", { class: "doc-meta-row" }, docMetaLine(doc).map((t) => el("span", {}, t))),
   ]);
 
+  const actions = el("div", { class: "doc-actions" }, [
+    el("button", { type: "button", class: "doc-action-btn", onclick: () => window.print() }, "Print"),
+    el("button", { type: "button", class: "doc-action-btn", onclick: () => exportDocumentAsJson(doc) }, "Export JSON"),
+  ]);
+
   const sections = [];
 
   if (doc.summary) {
@@ -490,7 +495,33 @@ export function renderDocumentPage(container, docId) {
     el("span", {}, lastUpdatedText),
   ]);
 
-  container.replaceChildren(breadcrumb, header, ...sections, pager, footer);
+  container.replaceChildren(breadcrumb, header, actions, ...sections, pager, footer);
+}
+
+function exportDocumentAsJson(doc) {
+  const volume = getVolume(doc.volume);
+  const dataset = getDataset(doc.dataset);
+  const people = (doc.people || []).map((id) => {
+    const p = getPerson(id);
+    return { id, name: p ? p.name : null };
+  });
+
+  const enriched = {
+    ...doc,
+    volumeTitle: volume ? volume.title : null,
+    datasetTitle: dataset ? dataset.title : null,
+    people,
+  };
+
+  const blob = new Blob([JSON.stringify(enriched, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${doc.id.replace(/#/g, "-")}.json`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 function buildPager(doc) {
@@ -578,4 +609,268 @@ export function renderPersonPage(container, personId) {
   }
 
   container.replaceChildren(breadcrumb, header, groupsEl);
+}
+
+// ---------------------------------------------------------------------
+// Keywords (mirrors the People index/detail pattern above, but keyed
+// on a free-text keyword string rather than a person id — keywords
+// have no separate registry, they're derived purely from documents'
+// own `keywords` arrays)
+// ---------------------------------------------------------------------
+
+export function documentsForKeyword(keyword) {
+  const docs = DOCUMENTS.filter((d) => (d.keywords || []).includes(keyword));
+  const byVolume = new Map();
+  for (const doc of docs) {
+    if (!byVolume.has(doc.volume)) byVolume.set(doc.volume, []);
+    byVolume.get(doc.volume).push(doc);
+  }
+  return allVolumesSorted()
+    .filter((v) => byVolume.has(v.id))
+    .map((v) => ({ volume: v, documents: documentsInVolume(v.id).filter((d) => byVolume.get(v.id).includes(d)) }));
+}
+
+export function allKeywordsSorted() {
+  const counts = new Map();
+  for (const doc of DOCUMENTS) {
+    for (const kw of doc.keywords || []) counts.set(kw, (counts.get(kw) || 0) + 1);
+  }
+  return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([keyword, count]) => ({ keyword, count }));
+}
+
+export function renderKeywordsIndexPage(container) {
+  const breadcrumb = renderBreadcrumb([{ label: "Home", href: "index.html" }, { label: "Keywords" }]);
+  const header = el("h1", {}, "Keywords");
+
+  const keywords = allKeywordsSorted();
+  if (keywords.length === 0) {
+    container.replaceChildren(breadcrumb, header, el("p", { class: "empty-state" }, "No documents have been tagged with keywords yet."));
+    return;
+  }
+
+  const list = el("div", { class: "people-index" });
+  for (const { keyword, count } of keywords) {
+    list.append(
+      el("a", { class: "person-row", href: buildUrl("keyword.html", { kw: keyword }) }, [
+        el("span", {}, keyword),
+        el("span", { class: "person-count" }, `${count} document${count === 1 ? "" : "s"}`),
+      ])
+    );
+  }
+
+  container.replaceChildren(breadcrumb, header, list);
+}
+
+export function renderKeywordPage(container, keyword) {
+  const groups = keyword ? documentsForKeyword(keyword) : [];
+  const total = groups.reduce((sum, g) => sum + g.documents.length, 0);
+
+  if (!keyword || total === 0) {
+    renderNotFound(container, {
+      title: "Keyword not found",
+      message: keyword ? `No documents are tagged with "${keyword}".` : "No keyword was given.",
+      backHref: "keywords.html",
+      backLabel: "Return to keyword index",
+    });
+    return;
+  }
+
+  const breadcrumb = renderBreadcrumb([
+    { label: "Home", href: "index.html" },
+    { label: "Keywords", href: "keywords.html" },
+    { label: keyword },
+  ]);
+  const header = el("div", { class: "doc-header" }, [
+    el("h1", {}, keyword),
+    el("p", { class: "meta-line" }, `Tagged on ${total} document${total === 1 ? "" : "s"}`),
+  ]);
+
+  const groupsEl = el("div", {});
+  for (const g of groups) {
+    const list = el("ul", { class: "person-doc-list" });
+    for (const doc of g.documents) {
+      list.append(el("li", {}, el("a", { href: buildUrl("document.html", { id: doc.id }) }, doc.title)));
+    }
+    groupsEl.append(el("div", { class: "person-volume-group" }, [el("h3", {}, g.volume.title), list]));
+  }
+
+  container.replaceChildren(breadcrumb, header, groupsEl);
+}
+
+// ---------------------------------------------------------------------
+// Dashboard: progress at a glance, overall and broken down by volume
+// and dataset. "Filled in" means a document has some real summary or
+// context text — a coarser but more honest signal of progress than
+// the status field alone, since a stub can be manually flipped to
+// "active" without anyone having actually written anything yet.
+// ---------------------------------------------------------------------
+
+function isFilledIn(doc) {
+  return Boolean((doc.summary && doc.summary.trim()) || (doc.context && doc.context.trim()));
+}
+
+function computeProgressStats(docs) {
+  const total = docs.length;
+  const active = docs.filter((d) => d.status === "active").length;
+  const deprecated = docs.filter((d) => d.status === "deprecated").length;
+  const filled = docs.filter(isFilledIn).length;
+  return { total, active, deprecated, filled, empty: total - filled };
+}
+
+function renderProgressBar(value, total, label) {
+  const pct = total ? Math.round((value / total) * 100) : 0;
+  const bar = el("div", { class: "progress-bar" }, el("div", { class: "progress-bar-fill", style: `width: ${pct}%` }));
+  return label ? el("div", {}, [bar, el("p", { class: "progress-bar-label" }, label)]) : bar;
+}
+
+function renderDashboardRow({ title, href, stats }) {
+  const pct = stats.total ? Math.round((stats.filled / stats.total) * 100) : 0;
+  return el("a", { class: "dashboard-row", href }, [
+    el("div", { class: "dashboard-row-head" }, [
+      el("span", { class: "dashboard-row-title" }, title),
+      el("span", { class: "dashboard-row-count" }, `${stats.filled}/${stats.total} filled in (${pct}%) · ${stats.active} active`),
+    ]),
+    renderProgressBar(stats.filled, stats.total),
+  ]);
+}
+
+export function renderDashboardPage(container) {
+  const breadcrumb = renderBreadcrumb([{ label: "Home", href: "index.html" }, { label: "Dashboard" }]);
+  const header = el("h1", {}, "Dashboard");
+
+  const overall = computeProgressStats(DOCUMENTS);
+  const overallPct = overall.total ? Math.round((overall.filled / overall.total) * 100) : 0;
+
+  const overallStats = el("div", { class: "stat-row" }, [
+    el("div", {}, [el("span", { class: "stat-value" }, String(overall.total)), el("span", { class: "stat-label" }, "Documents")]),
+    el("div", {}, [el("span", { class: "stat-value" }, String(overall.active)), el("span", { class: "stat-label" }, "Active")]),
+    el("div", {}, [el("span", { class: "stat-value" }, String(overall.deprecated)), el("span", { class: "stat-label" }, "Deprecated")]),
+    el("div", {}, [el("span", { class: "stat-value" }, String(overall.filled)), el("span", { class: "stat-label" }, "Filled in")]),
+  ]);
+
+  const overallSection = el("div", { class: "section-block" }, [
+    overallStats,
+    renderProgressBar(overall.filled, overall.total, `${overallPct}% of the archive is filled in`),
+  ]);
+
+  const volumeRows = el("div", { class: "dashboard-rows" });
+  for (const volume of allVolumesSorted()) {
+    const stats = computeProgressStats(documentsInVolume(volume.id));
+    volumeRows.append(renderDashboardRow({ title: volume.title, href: buildUrl("volume.html", { id: volume.id }), stats }));
+  }
+  const volumeSection = el("div", { class: "section-block" }, [el("h2", {}, "By volume"), volumeRows]);
+
+  const sections = [overallSection, volumeSection];
+
+  const datasetRows = el("div", { class: "dashboard-rows" });
+  let anyDatasets = false;
+  for (const volume of allVolumesSorted()) {
+    for (const ds of datasetsInVolume(volume.id)) {
+      anyDatasets = true;
+      const stats = computeProgressStats(documentsInDataset(ds.id));
+      datasetRows.append(
+        renderDashboardRow({ title: `${volume.title} — ${ds.title}`, href: buildUrl("dataset.html", { id: ds.id }), stats })
+      );
+    }
+  }
+  if (anyDatasets) sections.push(el("div", { class: "section-block" }, [el("h2", {}, "By dataset"), datasetRows]));
+
+  container.replaceChildren(breadcrumb, header, ...sections);
+}
+
+// ---------------------------------------------------------------------
+// Timeline: documents grouped by year (extracted from the `date`
+// field), oldest first. Documents with no date are counted but not
+// shown individually, since they have nothing to place on a timeline.
+// ---------------------------------------------------------------------
+
+function yearOf(doc) {
+  const m = /^(\d{4})/.exec(doc.date || "");
+  return m ? m[1] : null;
+}
+
+export function renderTimelinePage(container) {
+  const breadcrumb = renderBreadcrumb([{ label: "Home", href: "index.html" }, { label: "Timeline" }]);
+  const header = el("h1", {}, "Timeline");
+
+  const byYear = new Map();
+  let undatedCount = 0;
+  for (const doc of DOCUMENTS) {
+    const y = yearOf(doc);
+    if (y) {
+      if (!byYear.has(y)) byYear.set(y, []);
+      byYear.get(y).push(doc);
+    } else {
+      undatedCount++;
+    }
+  }
+
+  const years = [...byYear.keys()].sort();
+
+  if (years.length === 0) {
+    const empty = el(
+      "p",
+      { class: "empty-state" },
+      `None of the ${DOCUMENTS.length} documents have a date recorded yet. Once a document has a "date" field, it'll appear here automatically, grouped by year.`
+    );
+    container.replaceChildren(breadcrumb, header, empty);
+    return;
+  }
+
+  const sections = [];
+  for (const year of years) {
+    const docs = byYear.get(year).sort((a, b) => (a.date || "").localeCompare(b.date || "") || a.id.localeCompare(b.id));
+    sections.push(el("div", { class: "section-block" }, [el("h2", {}, year), renderDocTable(docs)]));
+  }
+
+  if (undatedCount > 0) {
+    sections.push(
+      el("p", { class: "volume-description" }, `${undatedCount} more document${undatedCount === 1 ? "" : "s"} have no date recorded and aren't shown above.`)
+    );
+  }
+
+  container.replaceChildren(breadcrumb, header, ...sections);
+}
+
+// ---------------------------------------------------------------------
+// Changelog: documents with a recorded lastUpdated date, most recent
+// first — an audit trail of real content changes across the archive.
+// ---------------------------------------------------------------------
+
+export function renderChangelogPage(container) {
+  const breadcrumb = renderBreadcrumb([{ label: "Home", href: "index.html" }, { label: "Changelog" }]);
+  const header = el("h1", {}, "Changelog");
+
+  const updated = DOCUMENTS.filter((d) => d.lastUpdated).sort((a, b) => (b.lastUpdated || "").localeCompare(a.lastUpdated || ""));
+  const neverUpdated = DOCUMENTS.length - updated.length;
+
+  const summary = el(
+    "p",
+    { class: "volume-description" },
+    `${updated.length} of ${DOCUMENTS.length} documents have a recorded update. ${neverUpdated} have never been updated.`
+  );
+
+  if (updated.length === 0) {
+    container.replaceChildren(breadcrumb, header, summary);
+    return;
+  }
+
+  const list = el("ul", { class: "volume-doc-table" });
+  for (const doc of updated) {
+    const vol = getVolume(doc.volume);
+    const ds = getDataset(doc.dataset);
+    const context = [vol ? vol.title : doc.volume, ds ? ds.title : null].filter(Boolean).join(" · ");
+    list.append(
+      el(
+        "li",
+        {},
+        el("a", { href: buildUrl("document.html", { id: doc.id }) }, [
+          el("span", { class: "vdt-left" }, [el("span", { class: "vdt-title" }, doc.title), renderStatusBadge(doc.status)]),
+          el("span", { class: "vdt-meta" }, `${formatDateFallback(doc.lastUpdated)} · ${context}`),
+        ])
+      )
+    );
+  }
+
+  container.replaceChildren(breadcrumb, header, summary, list);
 }

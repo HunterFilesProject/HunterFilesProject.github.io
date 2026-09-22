@@ -144,7 +144,7 @@ export function renderHeader(container, { activePage }) {
   });
 }
 
-export function renderSidebar(container, { activeDocId, activeVolumeId, activeDatasetId } = {}) {
+export function renderSidebar(container, { activeDocId, activeVolumeId, activeDatasetId, activePage } = {}) {
   const expanded = getExpandedVolumes();
   const expandedDatasets = getExpandedDatasets();
 
@@ -231,12 +231,22 @@ export function renderSidebar(container, { activeDocId, activeVolumeId, activeDa
     tree.append(node);
   }
 
-  const peopleLink = el("a", { class: "sidebar-link", href: "people.html" }, "People");
+  const referenceLinks = [
+    { page: "people", href: "people.html", label: "People" },
+    { page: "keywords", href: "keywords.html", label: "Keywords" },
+    { page: "timeline", href: "timeline.html", label: "Timeline" },
+    { page: "dashboard", href: "dashboard.html", label: "Dashboard" },
+    { page: "changelog", href: "changelog.html", label: "Changelog" },
+  ].map(({ page, href, label }) => {
+    const a = el("a", { class: "sidebar-link", href }, label);
+    if (page === activePage) a.setAttribute("aria-current", "page");
+    return a;
+  });
 
   container.replaceChildren(
     searchForm,
     el("div", { class: "sidebar-section" }, [volumesLabel, tree]),
-    el("div", { class: "sidebar-section" }, [el("p", { class: "sidebar-section-label" }, "Reference"), peopleLink])
+    el("div", { class: "sidebar-section" }, [el("p", { class: "sidebar-section-label" }, "Reference"), ...referenceLinks])
   );
 }
 

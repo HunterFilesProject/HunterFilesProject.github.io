@@ -1,0 +1,77 @@
+/*
+  css/print.css
+  -------------
+  Rules that ONLY apply when printing (or "Save as PDF", which uses
+  the same print rendering path). Screen display is completely
+  unaffected — every rule here is wrapped in @media print.
+
+  Goal: hide site chrome (header, sidebar, buttons, forms) and show
+  just the readable content, in plain black-on-white regardless of
+  which theme was active on screen.
+*/
+
+@media print {
+  .site-header,
+  .sidebar,
+  .drawer-backdrop,
+  .site-footer,
+  .sidebar-search,
+  .doc-actions,
+  .doc-pager,
+  .theme-toggle,
+  .header-nav,
+  .search-filters,
+  .search-box,
+  .breadcrumb {
+    display: none !important;
+  }
+
+  .shell {
+    display: block !important;
+  }
+
+  .main-column {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  #app-content {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Force plain black-on-white regardless of the on-screen theme —
+     printing in dark mode's colors would waste ink and often prints
+     poorly depending on the printer/PDF viewer. */
+  :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
+    --color-bg: #fff;
+    --color-surface: #fff;
+    --color-ink: #000;
+    --color-ink-muted: #333;
+    --color-ink-faint: #555;
+    --color-border: #999;
+    --color-border-strong: #333;
+    --color-accent: #000;
+    --color-focus: #000;
+  }
+
+  a { color: #000 !important; text-decoration: underline; }
+
+  .id-tag, .status-badge {
+    border-color: #000 !important;
+    color: #000 !important;
+  }
+
+  .doc-footer {
+    border-top-color: #000;
+  }
+
+  /* Avoid splitting a document's header awkwardly across a page break. */
+  .doc-header { break-inside: avoid; }
+}

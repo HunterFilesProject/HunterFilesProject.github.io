@@ -152,6 +152,38 @@ document-archive/
   actually been reviewed and filled in — see the field table in
   `CONTENT_GUIDE.md`.
 
+## Pages
+
+Beyond the volume/dataset/document/person pages already covered
+above, the sidebar's "Reference" section links to:
+
+- **`people.html`** — everyone referenced in the archive.
+- **`keywords.html`** / **`keyword.html`** — every keyword in use,
+  and (per keyword) every document tagged with it. Same index/detail
+  pattern as People, but keywords have no separate registry — they're
+  derived purely from documents' own `keywords` arrays.
+- **`timeline.html`** — documents grouped by year, oldest first, read
+  from each document's `date` field. Undated documents are counted
+  but not listed individually. Empty right now, since none of the 175
+  stubs have a date yet.
+- **`dashboard.html`** — progress at a glance: how many documents are
+  active vs. deprecated, and how many are actually "filled in" (have
+  real summary/context text) vs. still blank stubs, both overall and
+  broken down by volume and dataset. "Filled in" is judged by content,
+  not the `status` field, since a stub can be flipped to `"active"`
+  by hand before anything's actually been written.
+- **`changelog.html`** — documents with a recorded `lastUpdated` date,
+  most recent first. An audit trail of real content changes, not of
+  site/engine changes. Empty right now, since no document has a
+  `lastUpdated` date yet.
+
+Every document page also has **Print** and **Export JSON** buttons.
+Print uses a dedicated `css/print.css` stylesheet that hides site
+chrome and forces plain black-on-white regardless of the active
+theme; Export JSON downloads that one document's data (with volume,
+dataset, and people ids resolved to their display names) as a
+standalone `.json` file.
+
 ## Scaling further
 
 The architecture is built to keep growing past where it is today:

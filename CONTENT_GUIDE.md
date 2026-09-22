@@ -9,6 +9,13 @@ every document is a file that looks like a form with blanks filled in
 (`title: "..."`, `date: "..."`, and so on). You fill in the blanks,
 save the file, and the website builds the page for you automatically.
 
+Some pages need no content editing at all — the Dashboard, Timeline,
+Keywords, and Changelog pages are all generated automatically from
+whatever's already in `content/` and `data/`. See `README.md`'s
+"Pages" section for what each one shows. Filling in the `status`,
+`date`, and `lastUpdated` fields on individual documents (as
+described below) is what keeps those pages accurate.
+
 ---
 
 ## Before you start: the one rule that matters most

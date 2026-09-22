@@ -18,6 +18,11 @@ import {
   renderDocumentPage,
   renderPeopleIndexPage,
   renderPersonPage,
+  renderKeywordsIndexPage,
+  renderKeywordPage,
+  renderDashboardPage,
+  renderTimelinePage,
+  renderChangelogPage,
   getDocument,
   getDataset,
 } from "./renderer.js";
@@ -60,7 +65,7 @@ function boot() {
   }
 
   if (headerEl) renderHeader(headerEl, { activePage: pageType });
-  if (sidebarEl) renderSidebar(sidebarEl, { activeDocId, activeVolumeId, activeDatasetId });
+  if (sidebarEl) renderSidebar(sidebarEl, { activeDocId, activeVolumeId, activeDatasetId, activePage: pageType });
 
   if (contentEl) {
     switch (pageType) {
@@ -81,6 +86,21 @@ function boot() {
         break;
       case "person":
         renderPersonPage(contentEl, getQueryParam("id"));
+        break;
+      case "keywords":
+        renderKeywordsIndexPage(contentEl);
+        break;
+      case "keyword":
+        renderKeywordPage(contentEl, getQueryParam("kw"));
+        break;
+      case "dashboard":
+        renderDashboardPage(contentEl);
+        break;
+      case "timeline":
+        renderTimelinePage(contentEl);
+        break;
+      case "changelog":
+        renderChangelogPage(contentEl);
         break;
       default:
         break; // static pages (about.html) render nothing dynamic
