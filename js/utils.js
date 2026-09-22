@@ -3,7 +3,7 @@
   --------
   Small, dependency-free helper functions shared across the engine.
   Nothing in this file should ever need to change to add or edit
-  archive content.
+  project content.
 */
 
 /** Escape a string for safe insertion into HTML. Always call this

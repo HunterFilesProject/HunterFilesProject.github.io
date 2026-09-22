@@ -6,7 +6,7 @@
   (in development) the content validator.
 
   CONTENT MAINTAINERS: you should never need to touch this file.
-  To add or edit archive content, see content/ and CONTENT_GUIDE.md.
+  To add or edit project content, see content/ and CONTENT_GUIDE.md.
 */
 
 import { getPageType } from "./router.js";

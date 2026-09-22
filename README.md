@@ -1,9 +1,9 @@
-# Document Archive
+# The Hunter Files Project
 
-A static, documentation-style archive website for browsing and searching
-a collection of historical/documentary records. No backend, database,
-or build step — it runs entirely as static files, including on GitHub
-Pages.
+A contextual database for hunter files — a static, documentation-style
+website for browsing and searching a collection of historical/
+documentary records. No backend, database, or build step — it runs
+entirely as static files, including on GitHub Pages.
 
 If you're here to **add or edit a document**, you want
 [`CONTENT_GUIDE.md`](./CONTENT_GUIDE.md) instead — it's written for
@@ -17,7 +17,7 @@ The project is split into two layers:
 - **`css/`, `js/`, and the `.html` files** — the "engine." This is
   the code that turns content into pages: navigation, search,
   rendering, routing. You shouldn't need to edit this to add content.
-- **`content/` and `data/`** — the archive's actual content. Documents,
+- **`content/` and `data/`** — the project's actual content. Documents,
   volumes, datasets, and people live here as plain JavaScript objects.
 
 Each page (`document.html`, `volume.html`, `person.html`, etc.) is a
@@ -58,7 +58,7 @@ to serve static files over `http://`):
 
 ```bash
 # Python (usually already installed)
-cd document-archive
+cd hunter-files-project
 python3 -m http.server 8000
 # then open http://localhost:8000
 
@@ -113,10 +113,11 @@ No environment variables, secrets, or build configuration are needed.
 ## Project structure
 
 ```text
-document-archive/
+hunter-files-project/
 ├── index.html, search.html, volume.html, dataset.html,
-│   document.html, people.html, person.html, about.html,
-│   404.html                                          ← page shells
+│   document.html, people.html, person.html, keywords.html,
+│   keyword.html, dashboard.html, timeline.html, changelog.html,
+│   about.html, 404.html                              ← page shells
 ├── css/            ← visual styling (engine)
 ├── js/             ← navigation, rendering, search, routing (engine)
 ├── data/           ← registries: the arrays the engine actually reads
@@ -136,7 +137,7 @@ document-archive/
 └── CONTENT_GUIDE.md
 ```
 
-## Current archive at a glance
+## Current state at a glance
 
 - **Volume 1** — 76 documents (`HF1#0001`–`HF1#0076`, `HF1#0022` is
   intentionally missing), no datasets; shown as a flat list.
@@ -157,7 +158,7 @@ document-archive/
 Beyond the volume/dataset/document/person pages already covered
 above, the sidebar's "Reference" section links to:
 
-- **`people.html`** — everyone referenced in the archive.
+- **`people.html`** — everyone referenced across the files.
 - **`keywords.html`** / **`keyword.html`** — every keyword in use,
   and (per keyword) every document tagged with it. Same index/detail
   pattern as People, but keywords have no separate registry — they're
@@ -193,7 +194,7 @@ The architecture is built to keep growing past where it is today:
   10,000.
 - All search indexing, navigation, and cross-referencing is generated
   automatically from `data/` — nothing needs manual upkeep as the
-  archive grows.
+  project grows.
 - Datasets exist for exactly this reason: once a volume gets large
   enough that one flat list stops being useful to browse (volume 2
   already crossed that line at 100 documents), splitting it into
@@ -208,7 +209,7 @@ The architecture is built to keep growing past where it is today:
   to 5 digits before you're deep into data entry for it — it's a
   bigger job to rename ids after other documents have already linked
   to them via `relatedDocuments`.
-- If the archive grows into the thousands of documents and the
+- If the collection grows into the thousands of documents and the
   hand-rolled search in `js/search.js` starts to feel slow or its
   ranking starts to feel too simple, that file is intentionally
   isolated from the rest of the engine so it can be swapped for a

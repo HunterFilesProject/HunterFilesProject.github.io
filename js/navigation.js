@@ -106,10 +106,16 @@ export function renderHeader(container, { activePage }) {
     "aria-controls": "sidebar",
   }, "☰");
 
-  const brand = el("a", { class: "brand", href: "index.html" }, "Archive");
+  const brand = el("a", { class: "brand", href: "index.html" }, [
+    el("span", { class: "brand-mark" }, "HF"),
+    el("span", { class: "brand-text" }, [
+      el("span", { class: "brand-name" }, "Hunter Files"),
+      el("span", { class: "brand-tagline" }, "Contextual Database"),
+    ]),
+  ]);
 
   const searchForm = el("form", { class: "header-search", role: "search", action: "search.html" }, [
-    el("label", { for: "header-search-input", class: "visually-hidden" }, "Search the archive"),
+    el("label", { for: "header-search-input", class: "visually-hidden" }, "Search Hunter Files"),
     el("input", { id: "header-search-input", type: "search", name: "q", placeholder: "Search documentation…" }),
   ]);
 
@@ -153,7 +159,7 @@ export function renderSidebar(container, { activeDocId, activeVolumeId, activeDa
   const forceExpandId = activeVolumeId || null;
 
   const searchForm = el("form", { class: "sidebar-search", role: "search", action: "search.html" }, [
-    el("label", { for: "sidebar-search-input", class: "visually-hidden" }, "Search the archive"),
+    el("label", { for: "sidebar-search-input", class: "visually-hidden" }, "Search Hunter Files"),
     el("input", { id: "sidebar-search-input", type: "search", name: "q", placeholder: "Search…" }),
   ]);
 

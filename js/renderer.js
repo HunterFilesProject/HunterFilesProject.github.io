@@ -31,7 +31,7 @@ export function getPerson(id) { return peopleById.get(id) || null; }
 export function personName(id) {
   const p = peopleById.get(id);
   if (!p) {
-    console.warn(`[archive] Document references unknown person id "${id}".`);
+    console.warn(`[hunter-files] Document references unknown person id "${id}".`);
     return id;
   }
   return p.name;
@@ -221,7 +221,7 @@ export function renderRelatedDocuments(ids) {
   for (const id of ids) {
     const doc = getDocument(id);
     if (!doc) {
-      console.warn(`[archive] Related document reference "${id}" does not exist and was skipped.`);
+      console.warn(`[hunter-files] Related document reference "${id}" does not exist and was skipped.`);
       continue;
     }
     grid.append(
@@ -258,7 +258,7 @@ function docMetaLine(doc) {
 // Page renderers
 // ---------------------------------------------------------------------
 
-export function renderNotFound(container, { title, message, backHref = "index.html", backLabel = "Return to the archive" }) {
+export function renderNotFound(container, { title, message, backHref = "index.html", backLabel = "Return home" }) {
   container.replaceChildren(
     el("div", { class: "empty-state" }, [
       el("h2", {}, title),
@@ -273,13 +273,13 @@ export function renderHomePage(container) {
   const totalDocs = DOCUMENTS.length;
 
   const hero = el("div", { class: "home-hero" }, [
-    el("h1", {}, "Document Archive"),
-    el("p", {}, "A searchable collection of contextual records."),
+    el("h1", {}, "The Hunter Files Project"),
+    el("p", {}, "A contextual database for the hunter files — every document cross-referenced by volume, dataset, person, and keyword."),
   ]);
 
   const searchBox = el("form", { class: "search-page-box", role: "search", action: "search.html" }, [
-    el("label", { for: "home-search-input", class: "visually-hidden" }, "Search the archive"),
-    el("input", { id: "home-search-input", type: "search", name: "q", placeholder: "Search the archive…" }),
+    el("label", { for: "home-search-input", class: "visually-hidden" }, "Search Hunter Files"),
+    el("input", { id: "home-search-input", type: "search", name: "q", placeholder: "Search Hunter Files…" }),
   ]);
 
   const stats = el("div", { class: "stat-row" }, [
@@ -750,7 +750,7 @@ export function renderDashboardPage(container) {
 
   const overallSection = el("div", { class: "section-block" }, [
     overallStats,
-    renderProgressBar(overall.filled, overall.total, `${overallPct}% of the archive is filled in`),
+    renderProgressBar(overall.filled, overall.total, `${overallPct}% of the Hunter Files Project is filled in`),
   ]);
 
   const volumeRows = el("div", { class: "dashboard-rows" });
@@ -834,7 +834,7 @@ export function renderTimelinePage(container) {
 
 // ---------------------------------------------------------------------
 // Changelog: documents with a recorded lastUpdated date, most recent
-// first — an audit trail of real content changes across the archive.
+// first — an audit trail of real content changes across the project.
 // ---------------------------------------------------------------------
 
 export function renderChangelogPage(container) {

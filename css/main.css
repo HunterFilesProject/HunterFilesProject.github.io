@@ -3,35 +3,38 @@
   --------
   Design tokens (colors, type, spacing) and base element styles.
 
-  Palette concept: an archival records room, not a marketing site.
-  Cool paper-grey surfaces, ink-dark text, and a single "records stamp"
-  red used sparingly for links and active states. Dark mode is the
-  site's default (see js/navigation.js effectiveTheme()); light mode
-  is available via the toggle in the header and overrides the same
-  custom properties.
+  Palette concept: a field dossier, not a marketing site — the
+  materials of a case-file records room. Warm walnut/espresso surfaces
+  in dark mode (kraft-folder cream in light mode), parchment-toned
+  ink, a brass/ochre accent standing in for stamped ink and brass
+  fasteners, and a muted teal counterpoint (aged-patina metal) for
+  links and focus states so the palette isn't purely monochrome warm.
+  Dark mode is the site's default (see js/navigation.js
+  effectiveTheme()); light mode is available via the header toggle and
+  overrides the same custom properties.
 
   NOTE FOR MAINTAINERS: you should never need to edit this file to add
   or change document content. This file only controls the site's look.
 */
 
 :root {
-  /* -- Color: base values (used as-is only before JS runs, or if JS
-        is unavailable; js/navigation.js sets data-theme="dark" on
-        every normal page load, which overrides these via the rule
-        below) -- */
-  --color-bg:            #EEF0EA;
-  --color-surface:       #FBFBF8;
-  --color-surface-raised:#FFFFFF;
-  --color-ink:           #1E2320;
-  --color-ink-muted:     #5B655E;
-  --color-ink-faint:     #8A938C;
-  --color-border:        #D7DACF;
-  --color-border-strong: #B9BFB2;
-  --color-accent:        #8C2F39;
-  --color-accent-ink:    #FBFBF8;
-  --color-accent-soft:   #F3E3E1;
-  --color-highlight:     #F4D998;
-  --color-focus:         #2D5C6B;
+  /* -- Color: base values = light mode (used as-is only before JS
+        runs, or if JS is unavailable; js/navigation.js sets
+        data-theme="dark" on every normal page load, which overrides
+        these via the rule below) -- */
+  --color-bg:            #EAE2CC;
+  --color-surface:       #F6F1E3;
+  --color-surface-raised:#FFFDF7;
+  --color-ink:           #2A2014;
+  --color-ink-muted:     #6B5D48;
+  --color-ink-faint:     #93856C;
+  --color-border:        #D6C7A1;
+  --color-border-strong: #B7A57A;
+  --color-accent:        #8C5A1E;
+  --color-accent-ink:    #FBF6EA;
+  --color-accent-soft:   #E8D5A8;
+  --color-highlight:     #D9A93F;
+  --color-focus:         #3D6D64;
 
   /* -- Type -- */
   --font-serif:  Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
@@ -69,37 +72,37 @@
 /* Dark mode: system preference, unless the user has chosen explicitly */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-bg:            #141714;
-    --color-surface:       #1B1F1B;
-    --color-surface-raised:#20241F;
-    --color-ink:           #E8EAE3;
-    --color-ink-muted:     #A3AC9F;
-    --color-ink-faint:     #747D71;
-    --color-border:        #2C312B;
-    --color-border-strong: #3C4239;
-    --color-accent:        #D9727C;
-    --color-accent-ink:    #141714;
-    --color-accent-soft:   #332323;
-    --color-highlight:     #4A4022;
-    --color-focus:         #7FB6C9;
+    --color-bg:            #17130F;
+    --color-surface:       #211B15;
+    --color-surface-raised:#2A2118;
+    --color-ink:           #EDE4D3;
+    --color-ink-muted:     #A6957D;
+    --color-ink-faint:     #786A57;
+    --color-border:        #332B22;
+    --color-border-strong: #4A3F31;
+    --color-accent:        #C98A3B;
+    --color-accent-ink:    #17130F;
+    --color-accent-soft:   #3A2C18;
+    --color-highlight:     #E0AC4D;
+    --color-focus:         #6FA39B;
   }
 }
 
 /* Explicit user choice always wins over system preference */
 :root[data-theme="dark"] {
-  --color-bg:            #141714;
-  --color-surface:       #1B1F1B;
-  --color-surface-raised:#20241F;
-  --color-ink:           #E8EAE3;
-  --color-ink-muted:     #A3AC9F;
-  --color-ink-faint:     #747D71;
-  --color-border:        #2C312B;
-  --color-border-strong: #3C4239;
-  --color-accent:        #D9727C;
-  --color-accent-ink:    #141714;
-  --color-accent-soft:   #332323;
-  --color-highlight:     #4A4022;
-  --color-focus:         #7FB6C9;
+  --color-bg:            #17130F;
+  --color-surface:       #211B15;
+  --color-surface-raised:#2A2118;
+  --color-ink:           #EDE4D3;
+  --color-ink-muted:     #A6957D;
+  --color-ink-faint:     #786A57;
+  --color-border:        #332B22;
+  --color-border-strong: #4A3F31;
+  --color-accent:        #C98A3B;
+  --color-accent-ink:    #17130F;
+  --color-accent-soft:   #3A2C18;
+  --color-highlight:     #E0AC4D;
+  --color-focus:         #6FA39B;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

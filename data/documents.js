@@ -24,7 +24,7 @@
   FOLDER NOTE: volume 1's documents sit flat in content/documents/.
   Volume 2 documents live under content/documents/volume-2/, further
   split into content/documents/volume-2/dataset-NN/ sub-folders that
-  mirror the archive's own dataset groupings (see data/datasets.js
+  mirror the project's own dataset groupings (see data/datasets.js
   and each document's own `dataset` field). This nesting is purely
   for human browsing on disk — the site itself only cares about the
   path given in the import statement below, not where a file lives.

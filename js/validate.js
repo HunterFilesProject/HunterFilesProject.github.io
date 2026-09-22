@@ -4,7 +4,7 @@
   Sanity-checks the content dataset and prints results to the browser
   console. Runs only when CONFIG.developmentMode is true (see app.js).
   Never blocks the site from loading — a mistake in one document
-  should never take down the whole archive.
+  should never take down the whole project.
 */
 
 import { DOCUMENTS } from "../data/documents.js";
@@ -131,7 +131,7 @@ export function runValidation() {
 
   // ---- Print results ----
   console.groupCollapsed(
-    `%cARCHIVE VALIDATION%c — ${DOCUMENTS.length} documents, ${VOLUMES.length} volumes, ${DATASETS.length} datasets, ${PEOPLE.length} people`,
+    `%cHUNTER FILES VALIDATION%c — ${DOCUMENTS.length} documents, ${VOLUMES.length} volumes, ${DATASETS.length} datasets, ${PEOPLE.length} people`,
     "font-weight: bold;",
     "font-weight: normal;"
   );

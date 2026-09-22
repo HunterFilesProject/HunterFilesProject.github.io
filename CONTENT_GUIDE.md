@@ -1,7 +1,7 @@
-# Content Guide
+# Content Guide — The Hunter Files Project
 
 This guide is for adding and editing documents, people, and volumes in
-the archive. **You do not need to know HTML, CSS, or JavaScript
+the project. **You do not need to know HTML, CSS, or JavaScript
 programming to use it** — you're only ever editing plain data.
 
 If you've never edited a file like this before, the short version is:
@@ -32,7 +32,7 @@ rather than guessing.
 
 1. Go to `content/documents/`.
 2. Copy `_TEMPLATE.js` and rename the copy to the next unused ID. This
-   archive's documents are numbered `HF<volume number>#<4-digit
+   project's documents are numbered `HF<volume number>#<4-digit
    number>` — e.g. `HF1#0077` for the next document in volume 1, or
    `HF2#0101` for the next one in volume 2. (Check `data/documents.js`
    to see the highest number currently in use for that volume — or
@@ -264,7 +264,7 @@ run. Allow a minute or two after pushing.
 **I want to check my work before pushing to GitHub.** Open the site
 locally (see `README.md` for how) and open your browser's developer
 console (usually F12, or right-click → Inspect → Console). Every page
-load prints an "ARCHIVE VALIDATION" report there, listing:
+load prints an "HUNTER FILES VALIDATION" report there, listing:
 
 - Duplicate document, person, or dataset IDs
 - A document pointing at a volume, dataset, person, or related
