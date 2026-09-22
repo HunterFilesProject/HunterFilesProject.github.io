@@ -15,6 +15,6 @@ export const HF1_0003 = {
   context: `
 
 `,
-  relatedDocuments: [],
+  relatedDocuments: ["HF1#0002"],
   lastUpdated: null,
 };
