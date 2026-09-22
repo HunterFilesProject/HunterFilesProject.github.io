@@ -5,15 +5,15 @@ export const HF1_0001 = {
   sortOrder: null,
   title: "HF1#0001",
   status: "deprecated",
-  date: "",
+  date: "October 21, 2025",
   dateDisplay: "",
   roughTime: "",
-  location: "",
-  people: [],
-  keywords: [],
-  summary: "",
+  location: "Florida",
+  people: ["P-001", "P-011"],
+  keywords: ["Grade" "Digital"],
+  summary: "The October grades for Hunter Pita Yancey posted by P-001 on October 21st 2025.",
   context: `
-
+This was posted digitally from P-001 or Jane Doe #1. More Context in the future.
 `,
   relatedDocuments: [],
   lastUpdated: null,
