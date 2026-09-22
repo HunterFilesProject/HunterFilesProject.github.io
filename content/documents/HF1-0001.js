@@ -5,20 +5,16 @@ export const HF1_0001 = {
   sortOrder: null,
   title: "HF1#0001",
   status: "active",
-  date: "October 21, 2025",
+  date: "2025-10-21",
   dateDisplay: "",
   roughTime: "",
   location: "Florida",
   people: ["P-001", "P-011"],
-  keywords: ["Grade" "Digital"],
+  keywords: ["Grade", "Digital"],
   summary: "The October grades for Hunter Pita Yancey posted by P-001 on October 21st 2025.",
   context: `
 This was posted digitally from P-001 or Jane Doe #1. More Context in the future.
 `,
   relatedDocuments: [],
-  lastUpdated: 2026-09-22,
-<<<<<<< HEAD
+  lastUpdated: "2026-09-22",
 };
-=======
-};
->>>>>>> 743700493e10bdb8b1eade09c7845652cf6b93f2
