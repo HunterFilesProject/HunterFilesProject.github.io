@@ -4,7 +4,7 @@ export const HF1_0001 = {
   dataset: null,
   sortOrder: null,
   title: "HF1#0001",
-  status: "deprecated",
+  status: "active",
   date: "October 21, 2025",
   dateDisplay: "",
   roughTime: "",
@@ -17,4 +17,8 @@ This was posted digitally from P-001 or Jane Doe #1. More Context in the future.
 `,
   relatedDocuments: [],
   lastUpdated: 2026-09-22,
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 743700493e10bdb8b1eade09c7845652cf6b93f2
