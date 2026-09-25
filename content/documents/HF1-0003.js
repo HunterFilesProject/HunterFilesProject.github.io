@@ -4,7 +4,7 @@ export const HF1_0003 = {
   dataset: null,
   sortOrder: null,
   title: "HF1#0003",
-  status: "deprecated",
+  status: "Active",
   date: "2025-12-27",
   dateDisplay: "",
   roughTime: "Night",
@@ -15,6 +15,6 @@ export const HF1_0003 = {
   context: `
 This photo was from a collection of photos containing Hunter Pita Yancey along with John Doe #1 and an unknown redacted individual. We are currently unaware of the address in which this photo was taken.
 `,
-  relatedDocuments: ["HF1#0002"],
-  lastUpdated: null,
+  relatedDocuments: ["HF1#0002", "HF1#0004"],
+  lastUpdated: "2026-09-25",
 };
