@@ -11,5 +11,5 @@ export const VOL_01 = {
   id: "VOL-01",
   number: 1,
   title: "Volume I",
-  description: "Early correspondence and notes, 1951 through 1954.",
+  description: "Released February 2026",
 };
