@@ -4,7 +4,7 @@ export const HF1_0003 = {
   dataset: null,
   sortOrder: null,
   title: "HF1#0003",
-  status: "Active",
+  status: "active",
   date: "2025-12-27",
   dateDisplay: "",
   roughTime: "Night",
