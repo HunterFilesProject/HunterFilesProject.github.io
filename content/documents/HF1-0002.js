@@ -9,7 +9,7 @@ export const HF1_0002 = {
   dateDisplay: "7:15pm CST",
   roughTime: "Night",
   location: "Florida",
-  people: ["P-002", "P-011"],
+  people: ["P-001", "P-006", "P-011"],
   keywords: ["Party"],
   summary: "Image taken days before new years",
   context: `
