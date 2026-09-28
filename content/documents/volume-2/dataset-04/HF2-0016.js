@@ -13,7 +13,7 @@ export const HF2_0016 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows a person standing at a home entryway with a backpack. The image does not establish the person's identity, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

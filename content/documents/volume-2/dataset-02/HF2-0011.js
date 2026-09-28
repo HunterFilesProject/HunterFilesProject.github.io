@@ -13,7 +13,7 @@ export const HF2_0011 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people eating ice cream at an indoor table. One face has been obscured. The image does not establish their identities, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

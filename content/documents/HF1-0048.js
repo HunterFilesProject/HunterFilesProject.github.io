@@ -13,7 +13,9 @@ export const HF1_0048 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a person standing in front of a Hard Rock Cafe butterfly mural. The person's face has been obscured.
 
+The image does not establish the person's identity, the specific Hard Rock Cafe location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

@@ -13,7 +13,9 @@ export const HF1_0071 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a person holding a Wilson football in a kitchen or pantry area. The person's face is outside the visible frame.
 
+The image does not establish the person's identity, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

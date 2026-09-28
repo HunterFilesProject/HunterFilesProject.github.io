@@ -13,7 +13,7 @@ export const HF2_0019 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people at an indoor entertainment attraction near a mirror-themed display. One face has been obscured. The image does not establish the venue or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

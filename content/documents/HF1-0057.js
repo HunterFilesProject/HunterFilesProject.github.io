@@ -13,7 +13,9 @@ export const HF1_0057 = {
   keywords: [],
   summary: "",
   context: `
+This image shows two people standing together in a lobby or indoor public space. Faces and portions of the scene have been obscured.
 
+The image does not establish the identities of the people pictured, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

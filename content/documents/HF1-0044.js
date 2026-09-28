@@ -13,7 +13,9 @@ export const HF1_0044 = {
   keywords: [],
   summary: "",
   context: `
+This image shows two people using an interactive museum display titled "65th Best Wing An Overview." One person's face has been obscured.
 
+The image does not establish the identities of the people pictured, the museum location, or the date of the visit.
 `,
   relatedDocuments: [],
   lastUpdated: null,

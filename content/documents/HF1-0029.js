@@ -13,7 +13,9 @@ export const HF1_0029 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a person seated at an indoor table, with a decorated Christmas tree visible in the room. The person's face has been obscured.
 
+The image does not establish the person's identity, the location, or the date of the gathering.
 `,
   relatedDocuments: [],
   lastUpdated: null,

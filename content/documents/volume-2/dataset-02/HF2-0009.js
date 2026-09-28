@@ -13,7 +13,7 @@ export const HF2_0009 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people eating at an outdoor Chick-fil-A table at night. One face has been obscured. The image does not establish their identities, the specific location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

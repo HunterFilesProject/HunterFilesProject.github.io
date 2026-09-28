@@ -13,7 +13,7 @@ export const HF2_0029 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows people inside an exhibit space with a human-anatomy display. One face has been obscured. The image does not establish the venue or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

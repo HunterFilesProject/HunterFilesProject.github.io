@@ -13,7 +13,9 @@ export const HF1_0034 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a child indoors in a kitchen or dining area. The child's face and much of the surrounding scene have been obscured.
 
+The image does not establish the child's identity, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

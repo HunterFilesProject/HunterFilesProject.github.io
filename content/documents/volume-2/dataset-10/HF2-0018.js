@@ -13,7 +13,7 @@ export const HF2_0018 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows people driving go-karts at an outdoor track. The image does not establish the location, the participants' identities, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

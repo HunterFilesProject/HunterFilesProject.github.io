@@ -13,7 +13,7 @@ export const HF2_0014 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows several people seated aboard a passenger aircraft. Faces have been obscured. The image does not establish the flight, destination, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

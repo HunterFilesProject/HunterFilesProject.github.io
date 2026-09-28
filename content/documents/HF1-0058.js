@@ -13,7 +13,9 @@ export const HF1_0058 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a person standing near an indoor staircase. The person's face has been obscured.
 
+The image does not establish the person's identity, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

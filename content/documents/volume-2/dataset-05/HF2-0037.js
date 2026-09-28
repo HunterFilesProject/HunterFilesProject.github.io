@@ -13,7 +13,7 @@ export const HF2_0037 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows a person indoors wearing a Marvel shirt. The image does not establish the person's identity, location, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

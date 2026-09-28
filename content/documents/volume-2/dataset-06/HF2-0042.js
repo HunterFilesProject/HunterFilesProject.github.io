@@ -13,7 +13,7 @@ export const HF2_0042 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people standing outside an AMC theater. One face has been obscured. The image does not establish the specific theater location or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

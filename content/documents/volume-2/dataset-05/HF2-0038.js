@@ -13,7 +13,7 @@ export const HF2_0038 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people seated indoors. One face has been obscured. The image does not establish their identities, location, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

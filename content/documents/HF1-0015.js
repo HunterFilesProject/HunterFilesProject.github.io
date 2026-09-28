@@ -13,7 +13,9 @@ export const HF1_0015 = {
   keywords: [],
   summary: "",
   context: `
+This image is a screenshot of a chat interface showing a shared file or attachment. Its partially obscured filename contains a racial slur and a watermelon emoji, and the displayed file size is 21.30 KB.
 
+The screenshot does not identify the sender, recipient, platform, date, or the attachment's contents.
 `,
   relatedDocuments: [],
   lastUpdated: null,

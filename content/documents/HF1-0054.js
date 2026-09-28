@@ -13,7 +13,9 @@ export const HF1_0054 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a person taking a mirror photograph in an indoor corridor or lobby. The person's face and portions of the scene have been obscured.
 
+The image does not establish the person's identity, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

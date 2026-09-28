@@ -13,7 +13,9 @@ export const HF1_0013 = {
   keywords: [],
   summary: "",
   context: `
+This image shows the interior of a vehicle, including seats and a red McDonald's Happy Meal box. Large portions of the image have been obscured.
 
+The image alone does not establish the vehicle's location, date, occupants, or the circumstances in which it was taken.
 `,
   relatedDocuments: [],
   lastUpdated: null,

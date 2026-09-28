@@ -13,7 +13,7 @@ export const HF2_0040 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people at a waterfront amusement area. One face has been obscured. The image does not establish the location or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

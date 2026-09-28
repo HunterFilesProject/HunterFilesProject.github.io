@@ -13,7 +13,9 @@ export const HF1_0046 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a child standing near a decorated Christmas tree. The child's face has been obscured.
 
+The image does not establish the child's identity, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

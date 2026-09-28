@@ -13,7 +13,7 @@ export const HF2_0008 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows a person seated on a boardwalk beside a body of water. The image does not establish the person's identity, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

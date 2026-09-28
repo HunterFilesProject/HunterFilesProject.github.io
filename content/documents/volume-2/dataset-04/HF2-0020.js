@@ -13,7 +13,7 @@ export const HF2_0020 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows people seated on a pier or waterfront platform. One person is holding a drink. The image does not establish the location or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

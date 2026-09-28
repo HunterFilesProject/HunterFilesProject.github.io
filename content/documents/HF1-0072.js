@@ -13,7 +13,9 @@ export const HF1_0072 = {
   keywords: [],
   summary: "",
   context: `
+This image is a screenshot of a social-media post containing a photograph of a person holding a Wilson football in a kitchen or pantry area. A short caption is visible beside the image.
 
+The screenshot does not establish the poster's identity, the date, or the location.
 `,
   relatedDocuments: [],
   lastUpdated: null,

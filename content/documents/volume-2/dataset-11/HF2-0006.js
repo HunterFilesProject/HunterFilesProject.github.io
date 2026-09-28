@@ -13,7 +13,7 @@ export const HF2_0006 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows people on a sandy beach beside the water. The image does not establish their identities, the beach location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

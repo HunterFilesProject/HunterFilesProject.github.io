@@ -13,7 +13,9 @@ export const HF1_0040 = {
   keywords: [],
   summary: "",
   context: `
+This image shows people gathered outdoors near a decorated display or stage in the evening. Portions of the people and scene have been obscured.
 
+The image does not establish the identities of the people pictured, the location, the date, or the nature of the event.
 `,
   relatedDocuments: [],
   lastUpdated: null,

@@ -13,7 +13,9 @@ export const HF1_0074 = {
   keywords: [],
   summary: "",
   context: `
+This image is a narrow, low-resolution screenshot of a text-based exchange. Most text is unreadable at the available resolution.
 
+The screenshot does not establish the participants' identities, the platform, date, or the subject of the exchange.
 `,
   relatedDocuments: [],
   lastUpdated: null,

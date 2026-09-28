@@ -13,7 +13,9 @@ export const HF1_0047 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a child using an exercise machine indoors. The child's face and portions of the image have been obscured.
 
+The image does not establish the child's identity, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

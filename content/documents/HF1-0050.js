@@ -13,7 +13,9 @@ export const HF1_0050 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a person standing beside a large window or balcony with a distant outdoor view. The person's face has been obscured.
 
+The image does not establish the person's identity, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

@@ -13,7 +13,7 @@ export const HF2_0028 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people standing at the rail of a passenger boat on open water. One face has been obscured. The image does not establish the vessel, route, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

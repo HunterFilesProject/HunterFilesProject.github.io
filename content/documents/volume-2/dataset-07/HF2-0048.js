@@ -13,7 +13,7 @@ export const HF2_0048 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people seated around a fire pit outdoors at night. The image does not establish their identities, location, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

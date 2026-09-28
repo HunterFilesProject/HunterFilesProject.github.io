@@ -13,7 +13,7 @@ export const HF2_0023 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people standing on the deck of a passenger boat, with water in the background. One face has been obscured. The image does not establish the vessel, route, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

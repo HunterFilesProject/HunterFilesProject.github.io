@@ -13,7 +13,9 @@ export const HF1_0069 = {
   keywords: [],
   summary: "",
   context: `
+This image is a screenshot of a chat conversation dated September 19, 2025. It shows a brief exchange that includes insulting language and repeated short replies.
 
+Participant names and other identifying details are obscured. The screenshot does not independently establish the participants' identities or the broader context of the exchange.
 `,
   relatedDocuments: [],
   lastUpdated: null,

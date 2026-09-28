@@ -13,7 +13,9 @@ export const HF1_0017 = {
   keywords: [],
   summary: "",
   context: `
+This is a short vertical video showing a person in a bedroom. A bed, television, framed photographs, and a stuffed Dalmatian are visible; the person's face and portions of the frame have been obscured.
 
+The video alone does not establish the person's identity, the location, the date, or the purpose of the recording.
 `,
   relatedDocuments: [],
   lastUpdated: null,

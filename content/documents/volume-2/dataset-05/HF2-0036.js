@@ -13,7 +13,7 @@ export const HF2_0036 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows people seated in a movie theater auditorium. Faces have been obscured. The image does not establish the theater location, film, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

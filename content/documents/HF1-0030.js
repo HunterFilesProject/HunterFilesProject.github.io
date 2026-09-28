@@ -13,7 +13,9 @@ export const HF1_0030 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a large group posed indoors in front of a decorated Christmas tree. Faces and portions of the image have been obscured.
 
+The image does not establish the identities of the people pictured, the location, or the date of the gathering.
 `,
   relatedDocuments: [],
   lastUpdated: null,

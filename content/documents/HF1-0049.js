@@ -13,7 +13,9 @@ export const HF1_0049 = {
   keywords: [],
   summary: "",
   context: `
+This image shows several people outdoors in a sandy or grassy area. Faces and portions of the scene have been obscured.
 
+The image does not establish the identities of the people pictured, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

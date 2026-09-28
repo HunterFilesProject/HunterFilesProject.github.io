@@ -13,7 +13,7 @@ export const HF2_0022 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people walking through a retail or waterfront entertainment district. One face has been obscured. The image does not establish the location or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

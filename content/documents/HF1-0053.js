@@ -13,7 +13,9 @@ export const HF1_0053 = {
   keywords: [],
   summary: "",
   context: `
+This image shows two people standing beside a large window or balcony with a distant outdoor view. Faces have been obscured.
 
+The image does not establish the identities of the people pictured, the location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

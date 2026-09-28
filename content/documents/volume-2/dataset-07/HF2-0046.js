@@ -13,7 +13,7 @@ export const HF2_0046 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows a person seated on a bicycle indoors. The image does not establish the person's identity, location, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

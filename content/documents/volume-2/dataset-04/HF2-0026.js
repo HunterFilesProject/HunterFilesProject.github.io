@@ -13,7 +13,7 @@ export const HF2_0026 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows the wake behind a passenger boat, with people visible near the stern. The image does not establish the vessel, route, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

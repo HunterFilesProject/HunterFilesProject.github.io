@@ -13,7 +13,9 @@ export const HF1_0073 = {
   keywords: [],
   summary: "",
   context: `
+This image is a screenshot of a chat conversation dated October 3, 2025. The visible messages concern money or an item purchased by a parent and include insulting language.
 
+Participant names and portions of the exchange are obscured. The screenshot does not independently establish the participants' identities or the broader context of the exchange.
 `,
   relatedDocuments: [],
   lastUpdated: null,

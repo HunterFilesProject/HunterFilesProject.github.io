@@ -13,7 +13,7 @@ export const HF2_0033 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows people on a passenger boat alongside a pirate-themed vessel. One face has been obscured. The image does not establish the vessel, route, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

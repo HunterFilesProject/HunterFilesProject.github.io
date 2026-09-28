@@ -13,7 +13,7 @@ export const HF2_0044 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people viewing an aquarium exhibit. One face has been obscured. The image does not establish the venue or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

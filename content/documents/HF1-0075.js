@@ -13,7 +13,9 @@ export const HF1_0075 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a person using a laptop. The person's face and most of the laptop display have been obscured.
 
+The image does not establish the person's identity, the location, the date, or the activity shown on the screen.
 `,
   relatedDocuments: [],
   lastUpdated: null,

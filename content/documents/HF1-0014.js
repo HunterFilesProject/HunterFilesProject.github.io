@@ -13,7 +13,9 @@ export const HF1_0014 = {
   keywords: [],
   summary: "",
   context: `
+This image shows three people seated indoors near a decorated Christmas tree. Their faces and parts of the surrounding scene have been obscured.
 
+The image does not establish the identities of the people pictured, the location, or the date of the gathering.
 `,
   relatedDocuments: [],
   lastUpdated: null,

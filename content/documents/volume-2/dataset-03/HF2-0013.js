@@ -13,7 +13,7 @@ export const HF2_0013 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows a person seated inside a vehicle. The image does not establish the person's identity, the vehicle's location, or the date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

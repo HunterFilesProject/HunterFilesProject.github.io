@@ -13,7 +13,7 @@ export const HF2_0035 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows people at a theater concession counter. Faces have been obscured. The image does not establish the theater location or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

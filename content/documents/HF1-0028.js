@@ -13,7 +13,9 @@ export const HF1_0028 = {
   keywords: [],
   summary: "",
   context: `
+This image shows a person holding a decorated cake indoors. The person's face and a large portion of the scene have been obscured.
 
+The image alone does not establish the person's identity, the location, the date, or the occasion.
 `,
   relatedDocuments: [],
   lastUpdated: null,

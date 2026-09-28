@@ -13,7 +13,7 @@ export const HF2_0045 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows a person blowing out candles on a chocolate cake at home. The image does not establish the person's identity or the date of the celebration.
 `,
   relatedDocuments: [],
   lastUpdated: null,

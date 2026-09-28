@@ -13,7 +13,7 @@ export const HF2_0041 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows people seated on a boardwalk beside water. Faces and parts of the image have been obscured. The image does not establish the location or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,

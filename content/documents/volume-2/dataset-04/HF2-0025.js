@@ -13,7 +13,7 @@ export const HF2_0025 = {
   keywords: [],
   summary: "",
   context: `
-
+This image shows two people standing on the deck of a passenger boat near a marina. One face has been obscured. The image does not establish the vessel, route, or date.
 `,
   relatedDocuments: [],
   lastUpdated: null,
