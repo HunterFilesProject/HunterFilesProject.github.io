@@ -5,17 +5,17 @@ export const HF1_0013 = {
   sortOrder: null,
   title: "HF1#0013",
   status: "deprecated",
-  date: "",
+  date: null,
   dateDisplay: "",
   roughTime: "",
   location: "",
-  people: [],
-  keywords: [],
-  summary: "",
+  people: ["P-012", "P-010", "P-011"],
+  keywords: ["Vehicle"],
+  summary: "Image of a vehicle interior with a McDonald's Happy Meal box.",
   context: `
 This image shows the interior of a vehicle, including seats and a red McDonald's Happy Meal box. Large portions of the image have been obscured.
 
-The image alone does not establish the vehicle's location, date, occupants, or the circumstances in which it was taken.
+Based on the image, investigators were unable to find any information other than the redacted individuals in the image. The identities of the redacted individuals are Agent 050, Agent 010, and the unredacted individual is Hunter Pita Yancey.
 `,
   relatedDocuments: [],
   lastUpdated: null,

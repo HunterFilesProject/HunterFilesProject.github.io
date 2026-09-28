@@ -31,4 +31,6 @@ export const PEOPLE = [
   { id: "P-009", name: "John Doe #4" },
   { id: "P-010", name: "John Doe #5" },
   { id: "P-011", name: "Hunter Pita Yancey" },
+  { id: "P-012", name: "Agent #050" },
+  { id: "P-013", name: "Agent #010" },
 ];
